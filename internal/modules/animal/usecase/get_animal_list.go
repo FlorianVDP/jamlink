@@ -1,4 +1,4 @@
-package animalUsecase
+package animalUseCase
 
 import (
 	"tindermals-backend/internal/modules/animal/domain"

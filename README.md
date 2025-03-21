@@ -7,6 +7,7 @@
 - [🚀 Installation](#-installation)
 - [📂 Architecture](#-architecture)
 - [✅ Testing and code quality](#-testing-and-code-quality)
+- [📚 Swagger – API Documentation](#-swagger--api-Documentation)
 ---
 
 ## 🚀 Installation
@@ -92,3 +93,39 @@ Before pushing your code, Lefthook will again:
 - Run all tests
 - Check formatting
 - Check linting
+
+## 📚 Swagger – API Documentation
+
+- The API documentation is available at:  
+  👉 **[http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)**
+
+---
+
+### 🛠️ How to document an endpoint
+
+To auto-generate Swagger documentation, add special comments **above your route handlers**.  
+Example:
+
+```
+// @Summary      Ping
+// @Description  Check if the API is alive
+// @Tags         Health
+// @Success      200  {string}  string  "pong"
+// @Router       /ping [get]
+func Ping(c *gin.Context) {
+    c.String(200, "pong")
+}
+```
+#### ⚙️ Generate or update the documentation
+Every time you add or change a route, run:
+```sh
+swag init -g cmd/api/main.go
+```
+Then, restart the server:
+```sh
+go run cmd/api/main.go
+```
+#### 🛡️ Best practices
+- Always include: @Summary, @Description, @Tags, @Success, @Router
+- Run swag init every time you change your routes
+- Do not expose /swagger in production — or secure it with auth

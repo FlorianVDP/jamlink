@@ -7,11 +7,11 @@ import (
 )
 
 type AuthHandler struct {
-	CreateUserUseCase *userUsecase.CreateUserUseCase
-	LoginUserUseCase  *userUsecase.LoginUserUseCase
+	CreateUserUseCase *userUseCase.CreateUserUseCase
+	LoginUserUseCase  *userUseCase.LoginUserUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, createUserUC *userUsecase.CreateUserUseCase, loginUserUC *userUsecase.LoginUserUseCase) {
+func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase) {
 	handler := &AuthHandler{
 		CreateUserUseCase: createUserUC,
 		LoginUserUseCase:  loginUserUC,
@@ -21,8 +21,16 @@ func NewAuthHandler(router *gin.Engine, createUserUC *userUsecase.CreateUserUseC
 	router.GET("/auth/login", handler.LoginUser)
 }
 
+// RegisterUser register a new user
+// @Summary Post a new user
+// @Description Register a new user with email and password
+// @Tags Auth
+// @Produce json
+// @Success 201 {object} userDomain.User
+// @Failure 404 {object} map[string]string
+// @Router /auth/register [post]
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
-	var input userUsecase.CreateUserInput
+	var input userUseCase.CreateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -38,8 +46,16 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
+// LoginUser login a user
+// @Summary Login a user
+// @Description Login a user with email and password
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} userUseCase.LoginUserOutput
+// @Failure 404 {object} map[string]string
+// @Router /auth/login [get]
 func (h *AuthHandler) LoginUser(c *gin.Context) {
-	var input userUsecase.LoginUserInput
+	var input userUseCase.LoginUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

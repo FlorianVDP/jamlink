@@ -1,4 +1,4 @@
-package animalUsecase
+package animalUseCase
 
 import (
 	"testing"

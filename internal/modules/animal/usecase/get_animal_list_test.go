@@ -1,4 +1,4 @@
-package animalUsecase
+package animalUseCase
 
 import (
 	"github.com/google/uuid"

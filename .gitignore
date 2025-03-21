@@ -88,3 +88,7 @@ yarn-error.log*
 # 🔹 Git
 *.orig
 *.rej
+
+/docs
+/docs/*
+!docs/docs.go

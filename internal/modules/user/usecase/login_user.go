@@ -1,4 +1,4 @@
-package userUsecase
+package userUseCase
 
 import (
 	"errors"

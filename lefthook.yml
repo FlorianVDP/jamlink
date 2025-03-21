@@ -1,4 +1,17 @@
-pre-push:
+pre-commit:
+  parallel: true
   commands:
-    go-test:
+    gofmt:
+      run: gofmt -s -w .
+    govet:
+      run: go vet ./...
+    golangci-lint:
+      run: golangci-lint run ./...
+    gotest:
+      run: go test ./...
+
+pre-push:
+  parallel: true
+  commands:
+    gotest:
       run: go test ./...

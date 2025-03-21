@@ -35,7 +35,7 @@ func main() {
 
 	http.NewAnimalHandler(r, createAnimalUseCase, getAnimalListUseCase, getAnimalByIdUseCase, securityService)
 	http.NewAuthHandler(r, createUserUseCase, loginUserUseCase)
-	
+
 	// Run server
 	if err := r.Run(":8080"); err != nil {
 		return

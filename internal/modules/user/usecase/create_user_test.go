@@ -52,7 +52,6 @@ func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 	assert.Equal(t, "email already exists", err.Error())
 }
 
-// test
 func TestCreateUser_FailOnHashing(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)

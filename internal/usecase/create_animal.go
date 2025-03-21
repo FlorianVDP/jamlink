@@ -25,6 +25,6 @@ func (uc *CreateAnimalUseCase) Execute(input CreateAnimalInput) (*domain.Animal,
 		return nil, err
 	}
 
-	err = uc.repo.Save(animal)
+	err = uc.repo.Create(animal)
 	return animal, err
 }

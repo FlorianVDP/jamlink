@@ -2,14 +2,17 @@ package main
 
 import (
 	"tindermals-backend/internal/adapter/http"
-	"tindermals-backend/internal/infra"
+	"tindermals-backend/internal/infra/db"
+	"tindermals-backend/internal/repository"
 	"tindermals-backend/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	repo := infra.NewMemoryAnimalRepository()
+	database := db.ConnectDB()
+	db.MigrateDB(database)
+	repo := repository.NewPostgresAnimalRepository(database)
 	createAnimalUseCase := usecase.NewCreateAnimalUseCase(repo)
 	getAnimalListUseCase := usecase.NewGetAnimalListUseCase(repo)
 	getAnimalByIdUseCase := usecase.NewGetAnimalByIdUseCase(repo)
@@ -18,5 +21,9 @@ func main() {
 
 	http.NewAnimalHandler(r, createAnimalUseCase, getAnimalListUseCase, getAnimalByIdUseCase)
 
-	r.Run(":8080")
+	err := r.Run(":8080")
+
+	if err != nil {
+		return
+	}
 }

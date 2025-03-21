@@ -1,24 +1,20 @@
-package infra
+package repository
 
 import (
-	"errors"
 	"tindermals-backend/internal/domain"
+	"tindermals-backend/pkg/errors"
 )
 
 type MemoryAnimalRepository struct {
 	animals map[string]*domain.Animal
 }
 
-var (
-	ErrAnimalNotFound = errors.New("animal not found with id")
-)
-
 func NewMemoryAnimalRepository() *MemoryAnimalRepository {
 
 	return &MemoryAnimalRepository{animals: make(map[string]*domain.Animal)}
 }
 
-func (r *MemoryAnimalRepository) Save(animal *domain.Animal) error {
+func (r *MemoryAnimalRepository) Create(animal *domain.Animal) error {
 	r.animals[animal.ID] = animal
 
 	return nil
@@ -28,7 +24,7 @@ func (r *MemoryAnimalRepository) FindByID(id string) (*domain.Animal, error) {
 	animal, ok := r.animals[id]
 
 	if !ok {
-		return nil, ErrAnimalNotFound
+		return nil, errors.ErrAnimalNotFound
 	}
 
 	return animal, nil

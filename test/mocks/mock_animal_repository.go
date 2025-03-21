@@ -10,7 +10,7 @@ func (m *MockAnimalRepository) FindAll() ([]*domain.Animal, error) {
 	return m.Animals, nil
 }
 
-func (m *MockAnimalRepository) Save(animal *domain.Animal) error {
+func (m *MockAnimalRepository) Create(animal *domain.Animal) error {
 	m.Animals = append(m.Animals, animal)
 	return nil
 }

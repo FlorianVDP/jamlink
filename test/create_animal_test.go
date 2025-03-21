@@ -2,12 +2,12 @@ package test
 
 import (
 	"testing"
-	"tindermals-backend/internal/infra"
+	"tindermals-backend/internal/repository"
 	"tindermals-backend/internal/usecase"
 )
 
 func TestCreateAnimal(t *testing.T) {
-	repo := infra.NewMemoryAnimalRepository()
+	repo := repository.NewMemoryAnimalRepository()
 	uc := usecase.NewCreateAnimalUseCase(repo)
 
 	input := usecase.CreateAnimalInput{

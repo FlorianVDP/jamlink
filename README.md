@@ -24,9 +24,18 @@ cp .env.example .env
 ```sh
 go mod tidy
 ```
-### 4️⃣ Start the database (Postgres) and the server with Docker
+### 4️⃣ Start the database (Postgres) and the server (compiled) with Docker
+#### Only db (for local development)
+```sh
+docker-compose up -d db
+```
+#### db and server (for production) if you do that you need to create a .env.production file
 ```sh
 docker-compose up -d
+```
+### 4️⃣ Start the server
+```sh
+go run cmd/api/main.go
 ```
 ## 📂 Architecture
 ```

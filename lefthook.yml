@@ -9,9 +9,3 @@ pre-commit:
       run: golangci-lint run ./...
     gotest:
       run: go test ./...
-
-pre-push:
-  parallel: true
-  commands:
-    gotest:
-      run: go test ./...

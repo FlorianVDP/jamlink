@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"tindermals-backend/internal/adapter/http"
 	"tindermals-backend/internal/infra/db"
 	animalRepository "tindermals-backend/internal/modules/animal/repository"
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+	_ = godotenv.Load()
 	database := db.ConnectDB()
 	db.MigrateDB(database)
 

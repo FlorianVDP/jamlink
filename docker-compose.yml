@@ -6,9 +6,9 @@ services:
     container_name: tindermals-db
     restart: always
     environment:
-      POSTGRES_USER: tindermals
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: tindermals
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:

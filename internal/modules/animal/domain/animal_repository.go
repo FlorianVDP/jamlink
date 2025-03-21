@@ -1,4 +1,4 @@
-package domain
+package animalDomain
 
 type AnimalRepository interface {
 	Create(animal *Animal) error

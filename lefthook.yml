@@ -1,0 +1,4 @@
+pre-push:
+  commands:
+    go-test:
+      run: go test ./...

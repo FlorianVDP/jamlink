@@ -1,32 +1,42 @@
 package http
 
 import (
-	"net/http"
-	"tindermals-backend/internal/usecase"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"tindermals-backend/internal/adapter/http/middleware"
+	"tindermals-backend/internal/modules/animal/usecase"
+	"tindermals-backend/internal/shared/security"
 )
 
 type AnimalHandler struct {
-	CreateAnimalUseCase  *usecase.CreateAnimalUseCase
-	GetAnimalListUseCase *usecase.GetAnimalListUseCase
-	GetAnimalByIdUseCase *usecase.GetAnimalByIdUseCase
+	CreateAnimalUseCase  *animalUsecase.CreateAnimalUseCase
+	GetAnimalListUseCase *animalUsecase.GetAnimalListUseCase
+	GetAnimalByIdUseCase *animalUsecase.GetAnimalByIdUseCase
+
+	SecurityService security.SecurityService
 }
 
-func NewAnimalHandler(router *gin.Engine, createAnimalUC *usecase.CreateAnimalUseCase, getAnimalListUC *usecase.GetAnimalListUseCase, getAnimalByIdUC *usecase.GetAnimalByIdUseCase) {
+func NewAnimalHandler(router *gin.Engine, createAnimalUC *animalUsecase.CreateAnimalUseCase, getAnimalListUC *animalUsecase.GetAnimalListUseCase, getAnimalByIdUC *animalUsecase.GetAnimalByIdUseCase, securitySvc security.SecurityService) {
 	handler := &AnimalHandler{
 		CreateAnimalUseCase:  createAnimalUC,
 		GetAnimalListUseCase: getAnimalListUC,
 		GetAnimalByIdUseCase: getAnimalByIdUC,
+
+		SecurityService: securitySvc,
 	}
 
-	router.POST("/animals", handler.CreateAnimal)
+	// 🔓 Public routes
 	router.GET("/animals", handler.GetAnimalList)
 	router.GET("/animals/:id", handler.GetAnimalById)
+
+	// 🔒 Protected routes
+	protected := router.Group("/")
+	protected.Use(middleware.JWTAuthMiddleware(securitySvc))
+	protected.POST("/animals", handler.CreateAnimal)
 }
 
 func (h *AnimalHandler) CreateAnimal(c *gin.Context) {
-	var input usecase.CreateAnimalInput
+	var input animalUsecase.CreateAnimalInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -38,7 +48,7 @@ func (h *AnimalHandler) CreateAnimal(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, animal)
+	c.JSON(http.StatusCreated, animal)
 }
 
 func (h *AnimalHandler) GetAnimalList(c *gin.Context) {

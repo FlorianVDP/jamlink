@@ -3,13 +3,15 @@ package db
 import (
 	"gorm.io/gorm"
 	"log"
-	"tindermals-backend/internal/domain"
+	animalinfra "tindermals-backend/internal/modules/animal/infra"
+	userinfra "tindermals-backend/internal/modules/user/infra"
 )
 
 func MigrateDB(db *gorm.DB) {
-	err := db.AutoMigrate(&domain.Animal{})
+	log.Println("🚀 Running global database migrations...")
 
-	if err != nil {
-		log.Fatal("Migration error:", err)
-	}
+	userinfra.MigrateUserTable(db)
+	animalinfra.MigrateAnimalTable(db)
+
+	log.Println("✅ All migrations completed successfully!")
 }

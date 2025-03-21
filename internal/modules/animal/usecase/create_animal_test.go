@@ -1,16 +1,15 @@
-package test
+package animalUsecase
 
 import (
 	"testing"
-	"tindermals-backend/internal/repository"
-	"tindermals-backend/internal/usecase"
+	animal2 "tindermals-backend/internal/modules/animal/repository"
 )
 
 func TestCreateAnimal(t *testing.T) {
-	repo := repository.NewMemoryAnimalRepository()
-	uc := usecase.NewCreateAnimalUseCase(repo)
+	repo := animal2.NewMemoryAnimalRepository()
+	uc := NewCreateAnimalUseCase(repo)
 
-	input := usecase.CreateAnimalInput{
+	input := CreateAnimalInput{
 		Name:        "Muxu",
 		Age:         2,
 		Sexe:        "Male",
@@ -21,7 +20,7 @@ func TestCreateAnimal(t *testing.T) {
 	animal, err := uc.Execute(input)
 
 	if err != nil {
-		t.Fatalf("Erreur : %v", err)
+		t.Fatalf("Error: %v", err)
 	}
 
 	if animal.Name != "Muxu" {

@@ -24,13 +24,9 @@ cp .env.example .env
 ```sh
 go mod tidy
 ```
-### 4️⃣ Start the database (Postgres) with Docker
+### 4️⃣ Start the database (Postgres) and the server with Docker
 ```sh
 docker-compose up -d
-```
-### 5️⃣ Start server
-```sh
-go run main.go
 ```
 ## 📂 Architecture
 ```

@@ -1,1 +1,90 @@
+# 🔹 Go Build Artifacts
+/bin/
+/obj/
+/vendor/
+/*.exe
+/*.out
+/*.a
+/*.o
+/*.so
+/*.dll
+/*.dylib
+/.DS_Store
+/thumbs.db
+
+# 🔹 Go Modules & Dependencies
+/go/
+go.sum
+go.work
+go.work.sum
+
+# 🔹 IDEs & Editors
+### VS Code
+.vscode/
+
+### GoLand / JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+/out/
+target/
+workspace.xml
+
+# 🔹 Logs & Debug
+/logs/
+*.log
+*.log.*
+nohup.out
+debug/
+
+# 🔹 Environment Variables & Secrets
 .env
+.env.*
+!.env.example
+
+# 🔹 Binaries & Compiled Files
+*.test
+*.exe
+*.out
+*.a
+*.o
+*.so
+
+# 🔹 Temporary Files
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.~*
+
+# 🔹 Docker
+docker-compose.override.yml
+/docker/data/
+.dockerignore
+
+# 🔹 Database
+/data/
+pgdata/
+postgres-data/
+*.sqlite
+*.db
+*.sql-journal
+
+# 🔹 Coverage & Testing
+*.coverprofile
+*.cov
+*.coverage
+cover.out
+test-results/
+
+# 🔹 Node.js (if frontend is included)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🔹 Git
+*.orig
+*.rej

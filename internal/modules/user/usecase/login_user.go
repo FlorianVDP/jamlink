@@ -29,7 +29,8 @@ type LoginUserInput struct {
 }
 
 type LoginUserOutput struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, error) {
@@ -48,5 +49,10 @@ func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, err
 		return nil, ErrJWTFail
 	}
 
-	return &LoginUserOutput{Token: token}, nil
+	refreshToken, err := uc.security.GenerateJWT(user.ID)
+	if err != nil {
+		return nil, ErrJWTFail
+	}
+
+	return &LoginUserOutput{Token: token, RefreshToken: refreshToken}, nil
 }

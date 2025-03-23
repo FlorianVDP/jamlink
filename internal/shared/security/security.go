@@ -15,6 +15,7 @@ type SecurityService interface {
 	CheckPassword(password, hash string) bool
 	GenerateJWT(id uuid.UUID) (string, error)
 	ValidateJWT(tokenString string) (jwt.MapClaims, error)
+	GetJWTInfo(tokenString string) (uuid.UUID, error)
 }
 
 type securityService struct{}
@@ -62,4 +63,18 @@ func (s *securityService) ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	}
 
 	return claims, nil
+}
+
+func (s *securityService) GetJWTInfo(tokenString string) (uuid.UUID, error) {
+	claims, err := s.ValidateJWT(tokenString)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	id, err := uuid.Parse(claims["id"].(string))
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return id, nil
 }

@@ -29,3 +29,8 @@ func (m *MockSecurityService) ValidateJWT(tokenString string) (jwt.MapClaims, er
 	args := m.Called(tokenString)
 	return args.Get(0).(jwt.MapClaims), args.Error(1)
 }
+
+func (m *MockSecurityService) GetJWTInfo(token string) (uuid.UUID, error) {
+	args := m.Called(token)
+	return args.Get(0).(uuid.UUID), args.Error(1)
+}

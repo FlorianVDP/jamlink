@@ -7,18 +7,21 @@ import (
 )
 
 type AuthHandler struct {
-	CreateUserUseCase *userUseCase.CreateUserUseCase
-	LoginUserUseCase  *userUseCase.LoginUserUseCase
+	CreateUserUseCase   *userUseCase.CreateUserUseCase
+	LoginUserUseCase    *userUseCase.LoginUserUseCase
+	RefreshTokenUseCase *userUseCase.RefreshTokenUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase) {
+func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase) {
 	handler := &AuthHandler{
-		CreateUserUseCase: createUserUC,
-		LoginUserUseCase:  loginUserUC,
+		CreateUserUseCase:   createUserUC,
+		LoginUserUseCase:    loginUserUC,
+		RefreshTokenUseCase: refreshTokenUC,
 	}
 
 	router.POST("/auth/register", handler.RegisterUser)
 	router.GET("/auth/login", handler.LoginUser)
+	router.GET("/auth/refresh-token", handler.RefreshToken)
 }
 
 // RegisterUser register a new user
@@ -63,6 +66,32 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 	}
 
 	output, err := h.LoginUserUseCase.Execute(input)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}
+
+// RefreshToken refresh a token for a user
+// @Summary Refresh a token
+// @Description Refresh a token for a user
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} userUseCase.RefreshTokenOutput
+// @Failure 404 {object} map[string]string
+// @Router /auth/refresh-token [get]
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	var input userUseCase.RefreshTokenInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	output, err := h.RefreshTokenUseCase.Execute(input)
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

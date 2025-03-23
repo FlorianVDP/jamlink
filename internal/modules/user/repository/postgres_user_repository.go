@@ -1,6 +1,7 @@
 package userRepository
 
 import (
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"tindermals-backend/internal/modules/user/domain"
 )
@@ -21,6 +22,16 @@ func (r *PostgresUserRepository) FindByEmail(email string) (*userDomain.User, er
 	var user userDomain.User
 
 	if err := r.db.Where("email  = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *PostgresUserRepository) FindById(id uuid.UUID) (*userDomain.User, error) {
+	var user userDomain.User
+
+	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 

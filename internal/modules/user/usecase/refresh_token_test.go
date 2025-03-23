@@ -2,8 +2,8 @@ package userUseCase
 
 import (
 	"errors"
+	"jamlink-backend/internal/modules/user/mocks"
 	"testing"
-	"tindermals-backend/internal/modules/user/mocks"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

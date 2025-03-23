@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"jamlink-backend/internal/shared/security"
 	"net/http"
 	"strings"
-	"tindermals-backend/internal/shared/security"
 
 	"github.com/gin-gonic/gin"
 )

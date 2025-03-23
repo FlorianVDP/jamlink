@@ -1,8 +1,8 @@
 package animalinfra
 
 import (
+	"jamlink-backend/internal/modules/animal/domain"
 	"log"
-	"tindermals-backend/internal/modules/animal/domain"
 
 	"gorm.io/gorm"
 )

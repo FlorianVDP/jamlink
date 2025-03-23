@@ -2,9 +2,9 @@ package animalUseCase
 
 import (
 	"github.com/google/uuid"
+	"jamlink-backend/internal/modules/animal/domain"
+	"jamlink-backend/internal/modules/animal/mocks"
 	"testing"
-	"tindermals-backend/internal/modules/animal/domain"
-	"tindermals-backend/internal/modules/animal/mocks"
 )
 
 func TestGetAnimalById(t *testing.T) {

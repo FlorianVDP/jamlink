@@ -1,6 +1,6 @@
 package userUseCase
 
-import "tindermals-backend/internal/shared/security"
+import "jamlink-backend/internal/shared/security"
 
 type RefreshTokenInput struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`

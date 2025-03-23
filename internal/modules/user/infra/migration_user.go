@@ -1,8 +1,8 @@
 package userinfra
 
 import (
+	"jamlink-backend/internal/modules/user/domain"
 	"log"
-	"tindermals-backend/internal/modules/user/domain"
 
 	"gorm.io/gorm"
 )

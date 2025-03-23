@@ -1,7 +1,7 @@
 package animalUseCase
 
 import (
-	"tindermals-backend/internal/modules/animal/domain"
+	"jamlink-backend/internal/modules/animal/domain"
 )
 
 type GetAnimalListUseCase struct {

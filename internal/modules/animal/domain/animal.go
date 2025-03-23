@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	animalInvariants "tindermals-backend/internal/modules/animal/domain/invariants"
+	animalInvariants "jamlink-backend/internal/modules/animal/domain/invariants"
 )
 
 type Animal struct {

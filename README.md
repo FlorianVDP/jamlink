@@ -1,7 +1,6 @@
-# 🐾 Tindermals Backend
+# 🎶 JamLink Backend
 
-🔒 **Tindermals** is a **Go (Gin)** backend API designed to manage **animals** and **users**, featuring **JWT authentication**, **PostgreSQL storage**, and a **DDD (Domain-Driven Design)** architecture.
-
+🔒 JamLink is a Go (Gin) backend API built to manage users and animals, featuring JWT-based authentication, PostgreSQL for persistent storage, and a Domain-Driven Design (DDD) architecture.
 ---
 ## 📌 Table of Contents
 - [🚀 Installation](#-installation)
@@ -14,8 +13,8 @@
 
 ### 1️⃣ **Clone the project**
 ```sh
-git clone https://github.com/votre-repo/tindermals-backend.git
-cd tindermals-backend
+git clone https://github.com/FlorianVDP/jamlink.git
+cd jamlink-backend
 ```
 ### 2️⃣ Setup environment variables
 ```sh
@@ -40,7 +39,7 @@ go run cmd/api/main.go
 ```
 ## 📂 Architecture
 ```
-📦 tindermals-backend
+📦 jamlink-backend
 ├── 📁 cmd/api                 # Main entry point (main.go)
 ├── 📁 internal
 │   ├── 📁 adapter/http        # API Handlers (Routes)

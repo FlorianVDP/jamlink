@@ -1,8 +1,8 @@
 package animalUseCase
 
 import (
+	animal2 "jamlink-backend/internal/modules/animal/repository"
 	"testing"
-	animal2 "tindermals-backend/internal/modules/animal/repository"
 )
 
 func TestCreateAnimal(t *testing.T) {

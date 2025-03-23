@@ -2,7 +2,7 @@ package animalRepository
 
 import (
 	"gorm.io/gorm"
-	"tindermals-backend/internal/modules/animal/domain"
+	"jamlink-backend/internal/modules/animal/domain"
 )
 
 type PostgresAnimalRepository struct {

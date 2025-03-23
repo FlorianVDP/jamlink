@@ -5,17 +5,17 @@ import (
 	"github.com/joho/godotenv"
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "tindermals-backend/docs"
-	"tindermals-backend/internal/adapter/http"
-	"tindermals-backend/internal/infra/db"
-	animalRepository "tindermals-backend/internal/modules/animal/repository"
-	animalUsecase "tindermals-backend/internal/modules/animal/usecase"
-	userRepository "tindermals-backend/internal/modules/user/repository"
-	userUsecase "tindermals-backend/internal/modules/user/usecase"
-	"tindermals-backend/internal/shared/security"
+	_ "jamlink-backend/docs"
+	"jamlink-backend/internal/adapter/http"
+	"jamlink-backend/internal/infra/db"
+	animalRepository "jamlink-backend/internal/modules/animal/repository"
+	animalUsecase "jamlink-backend/internal/modules/animal/usecase"
+	userRepository "jamlink-backend/internal/modules/user/repository"
+	userUsecase "jamlink-backend/internal/modules/user/usecase"
+	"jamlink-backend/internal/shared/security"
 )
 
-// @title Tindermals API
+// @title Jamlink API
 // @version 1.0
 // @description This is an API with Swagger and Gin.
 // @host localhost:8080

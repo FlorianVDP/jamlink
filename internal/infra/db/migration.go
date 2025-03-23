@@ -2,9 +2,9 @@ package db
 
 import (
 	"gorm.io/gorm"
+	animalinfra "jamlink-backend/internal/modules/animal/infra"
+	userinfra "jamlink-backend/internal/modules/user/infra"
 	"log"
-	animalinfra "tindermals-backend/internal/modules/animal/infra"
-	userinfra "tindermals-backend/internal/modules/user/infra"
 )
 
 func MigrateDB(db *gorm.DB) {

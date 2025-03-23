@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"github.com/stretchr/testify/mock"
-	"tindermals-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/modules/user/domain"
 )
 
 type MockUserRepository struct {

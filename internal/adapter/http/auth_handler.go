@@ -2,8 +2,8 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"jamlink-backend/internal/modules/user/usecase"
 	"net/http"
-	"tindermals-backend/internal/modules/user/usecase"
 )
 
 type AuthHandler struct {

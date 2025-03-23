@@ -10,14 +10,14 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o tindermals ./cmd/api
+RUN go build -o jamlink ./cmd/api
 
 FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/tindermals .
+COPY --from=builder /app/jamlink .
 
 EXPOSE 8080
 
-CMD ["./tindermals"]
+CMD ["./jamlink"]

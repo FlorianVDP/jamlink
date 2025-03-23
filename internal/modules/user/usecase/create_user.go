@@ -2,8 +2,8 @@ package userUseCase
 
 import (
 	"errors"
-	"tindermals-backend/internal/modules/user/domain"
-	"tindermals-backend/internal/shared/security"
+	"jamlink-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/shared/security"
 )
 
 type CreateUserUseCase struct {

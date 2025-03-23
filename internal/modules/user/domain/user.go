@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"tindermals-backend/internal/modules/user/domain/invariants"
+	"jamlink-backend/internal/modules/user/domain/invariants"
 )
 
 type User struct {

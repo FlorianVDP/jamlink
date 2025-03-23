@@ -4,9 +4,9 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"jamlink-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/modules/user/mocks"
 	"testing"
-	"tindermals-backend/internal/modules/user/domain"
-	"tindermals-backend/internal/modules/user/mocks"
 )
 
 func TestCreateUser_Success(t *testing.T) {

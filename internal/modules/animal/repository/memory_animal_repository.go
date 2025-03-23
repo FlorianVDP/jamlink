@@ -1,8 +1,8 @@
 package animalRepository
 
 import (
-	"tindermals-backend/internal/modules/animal/domain"
-	"tindermals-backend/internal/modules/animal/repository/errors"
+	"jamlink-backend/internal/modules/animal/domain"
+	"jamlink-backend/internal/modules/animal/repository/errors"
 )
 
 type MemoryAnimalRepository struct {

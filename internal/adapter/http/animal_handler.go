@@ -2,10 +2,10 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"jamlink-backend/internal/adapter/http/middleware"
+	"jamlink-backend/internal/modules/animal/usecase"
+	"jamlink-backend/internal/shared/security"
 	"net/http"
-	"tindermals-backend/internal/adapter/http/middleware"
-	"tindermals-backend/internal/modules/animal/usecase"
-	"tindermals-backend/internal/shared/security"
 )
 
 type AnimalHandler struct {

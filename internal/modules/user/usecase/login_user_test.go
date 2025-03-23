@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"tindermals-backend/internal/modules/user/domain"
-	"tindermals-backend/internal/modules/user/mocks"
+	"jamlink-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/modules/user/mocks"
 )
 
 func TestLoginUser_Success(t *testing.T) {

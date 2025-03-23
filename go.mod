@@ -1,4 +1,4 @@
-module tindermals-backend
+module jamlink-backend
 
 go 1.24.1
 

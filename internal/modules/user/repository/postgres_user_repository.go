@@ -2,7 +2,7 @@ package userRepository
 
 import (
 	"gorm.io/gorm"
-	"tindermals-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/modules/user/domain"
 )
 
 type PostgresUserRepository struct {

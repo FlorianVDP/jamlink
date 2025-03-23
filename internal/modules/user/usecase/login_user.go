@@ -2,8 +2,8 @@ package userUseCase
 
 import (
 	"errors"
-	userDomain "tindermals-backend/internal/modules/user/domain"
-	"tindermals-backend/internal/shared/security"
+	userDomain "jamlink-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/shared/security"
 )
 
 var (

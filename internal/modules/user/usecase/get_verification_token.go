@@ -1,6 +1,7 @@
 package userUseCase
 
 import (
+	"errors"
 	"fmt"
 	userDomain "jamlink-backend/internal/modules/user/domain"
 	"jamlink-backend/internal/shared/email"
@@ -32,6 +33,10 @@ func (uc *GetVerificationEmailUseCase) Execute(input GetVerificationEmailInput) 
 	token, err := uc.security.GenerateVerificationJWT(input.Email)
 	if err != nil {
 		return err
+	}
+
+	if user.Verification.IsVerified || user.Verification.VerifiedAt != nil {
+		return errors.New("your account is already verified")
 	}
 
 	err = uc.email.Send(user.Email, email.TemplateVerification, user.PreferredLang, map[string]string{

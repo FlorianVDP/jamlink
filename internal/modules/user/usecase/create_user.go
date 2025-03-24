@@ -1,7 +1,6 @@
 package userUseCase
 
 import (
-	"errors"
 	"jamlink-backend/internal/modules/user/domain"
 	"jamlink-backend/internal/shared/security"
 )
@@ -24,7 +23,7 @@ func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*userDomain.User, e
 	_, err := uc.repo.FindByEmail(input.Email)
 
 	if err == nil {
-		return nil, errors.New("email already exists") // TODO: Ajouter une erreur personnalisée dans un fichier d'erreurs
+		return nil, userDomain.ErrEmailAlreadyExists
 	}
 
 	hashedPassword, err := uc.security.HashPassword(input.Password)

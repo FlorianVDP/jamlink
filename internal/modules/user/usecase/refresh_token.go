@@ -1,13 +1,16 @@
 package userUseCase
 
-import "jamlink-backend/internal/shared/security"
+import (
+	"jamlink-backend/internal/shared/security"
+)
 
 type RefreshTokenInput struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
 type RefreshTokenOutput struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"-"`
 }
 
 type RefreshTokenUseCase struct {
@@ -32,5 +35,10 @@ func (uc *RefreshTokenUseCase) Execute(input RefreshTokenInput) (*RefreshTokenOu
 		return nil, err
 	}
 
-	return &RefreshTokenOutput{Token: token}, nil
+	refreshToken, err := uc.security.GenerateRefreshJWT(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RefreshTokenOutput{Token: token, RefreshToken: refreshToken}, nil
 }

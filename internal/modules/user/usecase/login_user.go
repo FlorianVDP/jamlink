@@ -8,7 +8,6 @@ import (
 
 var (
 	ErrInvalidEmailOrPassword = errors.New("invalid email or password")
-	ErrJWTFail                = errors.New("failed to generate JWT")
 )
 
 type LoginUserUseCase struct {
@@ -46,12 +45,12 @@ func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, err
 	token, err := uc.security.GenerateJWT(user.ID)
 
 	if err != nil {
-		return nil, ErrJWTFail
+		return nil, err
 	}
 
-	refreshToken, err := uc.security.GenerateJWT(user.ID)
+	refreshToken, err := uc.security.GenerateRefreshJWT(user.ID)
 	if err != nil {
-		return nil, ErrJWTFail
+		return nil, err
 	}
 
 	return &LoginUserOutput{Token: token, RefreshToken: refreshToken}, nil

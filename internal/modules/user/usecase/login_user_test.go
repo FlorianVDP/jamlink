@@ -29,6 +29,7 @@ func TestLoginUser_Success(t *testing.T) {
 	mockRepo.On("FindByEmail", input.Email).Return(user, nil)
 	mockSecurity.On("CheckPassword", input.Password, user.Password).Return(true)
 	mockSecurity.On("GenerateJWT", user.ID).Return("mocked.jwt.token", nil)
+	mockSecurity.On("GenerateRefreshJWT", user.ID).Return("mocked.jwt.token", nil)
 
 	usecase := NewLoginUserUseCase(mockRepo, mockSecurity)
 	output, err := usecase.Execute(input)
@@ -61,7 +62,8 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, output)
-	assert.Equal(t, "invalid email or password", err.Error())
+	assert.ErrorIs(t, err, ErrInvalidEmailOrPassword)
+
 }
 
 func TestLoginUser_UserNotFound(t *testing.T) {

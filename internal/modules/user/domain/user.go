@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"jamlink-backend/internal/modules/user/domain/invariants"
 )
 
 type User struct {
@@ -16,10 +15,6 @@ type User struct {
 }
 
 func CreateUser(email string, password string) (*User, error) {
-	if err := userInvariants.ValidateUser(email, password); err != nil {
-		return nil, err
-	}
-
 	return &User{
 		ID:        uuid.New(),
 		Email:     email,

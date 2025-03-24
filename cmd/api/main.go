@@ -8,8 +8,6 @@ import (
 	_ "jamlink-backend/docs"
 	"jamlink-backend/internal/adapter/http"
 	"jamlink-backend/internal/infra/db"
-	animalRepository "jamlink-backend/internal/modules/animal/repository"
-	animalUsecase "jamlink-backend/internal/modules/animal/usecase"
 	userRepository "jamlink-backend/internal/modules/user/repository"
 	userUsecase "jamlink-backend/internal/modules/user/usecase"
 	"jamlink-backend/internal/shared/security"
@@ -27,17 +25,12 @@ func main() {
 	db.MigrateDB(database)
 
 	// Repositories
-	animalRepo := animalRepository.NewPostgresAnimalRepository(database)
 	userRepo := userRepository.NewPostgresUserRepository(database)
 
 	// Services
 	securityService := security.NewSecurityService()
 
 	// Use Cases
-	createAnimalUseCase := animalUsecase.NewCreateAnimalUseCase(animalRepo)
-	getAnimalListUseCase := animalUsecase.NewGetAnimalListUseCase(animalRepo)
-	getAnimalByIdUseCase := animalUsecase.NewGetAnimalByIdUseCase(animalRepo)
-
 	createUserUseCase := userUsecase.NewCreateUserUseCase(userRepo, securityService)
 	loginUserUseCase := userUsecase.NewLoginUserUseCase(userRepo, securityService)
 	refreshTokenUseCase := userUsecase.NewRefreshTokenUseCase(securityService)
@@ -45,7 +38,6 @@ func main() {
 	// Setup router
 	r := gin.Default()
 
-	http.NewAnimalHandler(r, createAnimalUseCase, getAnimalListUseCase, getAnimalByIdUseCase, securityService)
 	http.NewAuthHandler(r, createUserUseCase, loginUserUseCase, refreshTokenUseCase)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 

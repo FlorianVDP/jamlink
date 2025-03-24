@@ -1,10 +1,12 @@
 package security
 
 import (
+	"encoding/base64"
 	"github.com/google/uuid"
 	"os"
 	"time"
 
+	"crypto/rand"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,6 +18,7 @@ type SecurityService interface {
 	GenerateRefreshJWT(id uuid.UUID) (string, error)
 	ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	GetJWTInfo(tokenString string) (uuid.UUID, error)
+	GenerateSecureRandomString(n int) (string, error)
 }
 
 type securityService struct{}
@@ -102,4 +105,14 @@ func (s *securityService) GetJWTInfo(tokenString string) (uuid.UUID, error) {
 	}
 
 	return id, nil
+}
+
+func (s *securityService) GenerateSecureRandomString(n int) (string, error) {
+	bytes := make([]byte, n)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", ErrSecureRandomGeneration
+	}
+
+	return base64.URLEncoding.EncodeToString(bytes), nil
 }

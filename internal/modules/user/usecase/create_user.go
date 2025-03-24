@@ -1,12 +1,10 @@
 package userUseCase
 
 import (
-	"fmt"
 	"jamlink-backend/internal/modules/user/domain"
 	userInvariants "jamlink-backend/internal/modules/user/domain/invariants"
 	"jamlink-backend/internal/shared/email"
 	"jamlink-backend/internal/shared/security"
-	"os"
 )
 
 type CreateUserUseCase struct {
@@ -42,25 +40,12 @@ func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*userDomain.User, e
 		return nil, err
 	}
 
-	user, err := userDomain.CreateUser(input.Email, hashedPassword, input.PreferredLang)
+	user, err := userDomain.CreateUser(input.Email, hashedPassword, input.PreferredLang, "local")
 	if err != nil {
 		return nil, err
 	}
 
 	err = uc.repo.Create(user)
-
-	if err != nil {
-		return nil, err
-	}
-
-	token, err := uc.security.GenerateVerificationJWT(user.Email)
-	if err != nil {
-		return nil, err
-	}
-
-	err = uc.email.Send(user.Email, email.TemplateVerification, user.PreferredLang, map[string]string{
-		"URL": fmt.Sprintf("%s?token=%s", os.Getenv("FRONTEND_VERIFY_URL"), token),
-	})
 
 	if err != nil {
 		return nil, err

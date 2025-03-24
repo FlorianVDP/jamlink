@@ -57,7 +57,7 @@ func (uc *LoginUserWithGoogleUseCase) Execute(input LoginUserWithGoogleInput) (*
 			return nil, err
 		}
 
-		user, err = userDomain.CreateUser(email, hashed, input.PreferredLang)
+		user, err = userDomain.CreateUser(email, hashed, input.PreferredLang, "google")
 		if err != nil {
 			return nil, err
 		}

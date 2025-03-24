@@ -38,12 +38,13 @@ func main() {
 	loginUserUseCase := userUsecase.NewLoginUserUseCase(userRepo, securityService)
 	loginUserWithGoogleUseCase := userUsecase.NewLoginUserWithGoogleUseCase(userRepo, securityService)
 	refreshTokenUseCase := userUsecase.NewRefreshTokenUseCase(securityService)
+	getVerificationTokenUseCase := userUsecase.NewGetVerificationEmailUseCase(securityService, userRepo, emailService)
 	verifyUserUseCase := userUsecase.NewVerifyUserUseCase(userRepo, securityService)
 
 	// Setup router
 	r := gin.Default()
 
-	http.NewAuthHandler(r, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase)
+	http.NewAuthHandler(r, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase, getVerificationTokenUseCase)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 
 	// Run server

@@ -14,6 +14,7 @@ type User struct {
 	UpdatedAt     time.Time        `gorm:"autoUpdateTime" json:"-"`
 	PreferredLang string           `gorm:"type:varchar(5);default:'fr'" json:"preferredLang"`
 	Verification  UserVerification `gorm:"embedded" json:"-"`
+	Provider      string           `gorm:"default:'local'" json:"-"`
 }
 
 type UserVerification struct {
@@ -21,7 +22,7 @@ type UserVerification struct {
 	VerifiedAt *time.Time `gorm:"autoUpdateTime;default:null" json:"-"`
 }
 
-func CreateUser(email string, password string, preferredLang string) (*User, error) {
+func CreateUser(email string, password string, preferredLang string, provider string) (*User, error) {
 	return &User{
 		ID:            uuid.New(),
 		Email:         email,
@@ -33,5 +34,6 @@ func CreateUser(email string, password string, preferredLang string) (*User, err
 			IsVerified: false,
 			VerifiedAt: nil,
 		},
+		Provider: provider,
 	}, nil
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"jamlink-backend/internal/modules/user/usecase"
 	"net/http"
+	"time"
 )
 
 type AuthHandler struct {
@@ -21,7 +22,7 @@ func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseC
 
 	router.POST("/auth/register", handler.RegisterUser)
 	router.GET("/auth/login", handler.LoginUser)
-	router.GET("/auth/refresh-token", handler.RefreshToken)
+	router.POST("/auth/refresh-token", handler.RefreshToken)
 }
 
 // RegisterUser register a new user
@@ -72,7 +73,16 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, output)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    output.RefreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	})
+
+	c.JSON(http.StatusOK, output.Token)
 }
 
 // RefreshToken refresh a token for a user
@@ -82,14 +92,16 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} userUseCase.RefreshTokenOutput
 // @Failure 404 {object} map[string]string
-// @Router /auth/refresh-token [get]
+// @Router /auth/refresh-token [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	var input userUseCase.RefreshTokenInput
+	cookie, err := c.Request.Cookie("refresh_token")
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No refresh token"})
 		return
 	}
+
+	input := userUseCase.RefreshTokenInput{RefreshToken: cookie.Value}
 
 	output, err := h.RefreshTokenUseCase.Execute(input)
 
@@ -97,6 +109,15 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    output.RefreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	})
 
 	c.JSON(http.StatusOK, output)
 }

@@ -25,6 +25,11 @@ func (m *MockSecurityService) GenerateJWT(id uuid.UUID) (string, error) {
 	return args.String(0), args.Error(1)
 }
 
+func (m *MockSecurityService) GenerateRefreshJWT(id uuid.UUID) (string, error) {
+	args := m.Called(id)
+	return args.String(0), args.Error(1)
+}
+
 func (m *MockSecurityService) ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 	args := m.Called(tokenString)
 	return args.Get(0).(jwt.MapClaims), args.Error(1)

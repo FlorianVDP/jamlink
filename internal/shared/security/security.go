@@ -1,7 +1,6 @@
 package security
 
 import (
-	"errors"
 	"github.com/google/uuid"
 	"os"
 	"time"
@@ -14,6 +13,7 @@ type SecurityService interface {
 	HashPassword(password string) (string, error)
 	CheckPassword(password, hash string) bool
 	GenerateJWT(id uuid.UUID) (string, error)
+	GenerateRefreshJWT(id uuid.UUID) (string, error)
 	ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	GetJWTInfo(tokenString string) (uuid.UUID, error)
 }
@@ -28,7 +28,12 @@ var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func (s *securityService) HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
+
+	if err != nil {
+		return "", ErrPasswordHashing
+	}
+
+	return string(bytes), nil
 }
 
 func (s *securityService) CheckPassword(password, hash string) bool {
@@ -38,28 +43,43 @@ func (s *securityService) CheckPassword(password, hash string) bool {
 
 func (s *securityService) GenerateJWT(id uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"id":  id.String(),
+		"exp": time.Now().Add(15 * time.Minute).Unix(),
 	})
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		return "", ErrJWTGeneration
+	}
+	return tokenString, nil
+}
 
-	return token.SignedString(jwtSecret)
+func (s *securityService) GenerateRefreshJWT(id uuid.UUID) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  id.String(),
+		"exp": time.Now().Add(7 * 24 * time.Hour).Unix(),
+	})
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		return "", ErrRefreshJWTGeneration
+	}
+	return tokenString, nil
 }
 
 func (s *securityService) ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
+			return nil, ErrInvalidJWTSigningMethod
 		}
 		return jwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("cannot extract claims")
+		return nil, ErrCannotExtractClaims
 	}
 
 	return claims, nil
@@ -71,9 +91,14 @@ func (s *securityService) GetJWTInfo(tokenString string) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 
-	id, err := uuid.Parse(claims["id"].(string))
+	rawID, ok := claims["id"].(string)
+	if !ok {
+		return uuid.Nil, ErrInvalidUserID
+	}
+
+	id, err := uuid.Parse(rawID)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, ErrInvalidUserID
 	}
 
 	return id, nil

@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"jamlink-backend/internal/modules/user/usecase"
+	"jamlink-backend/internal/shared/lang"
 	"net/http"
 	"time"
 )
@@ -12,14 +13,16 @@ type AuthHandler struct {
 	LoginUserUseCase           *userUseCase.LoginUserUseCase
 	LoginUserWithGoogleUseCase *userUseCase.LoginUserWithGoogleUseCase
 	RefreshTokenUseCase        *userUseCase.RefreshTokenUseCase
+	LangNormalizer             lang.LangNormalizer
 }
 
-func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase) {
+func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase) {
 	handler := &AuthHandler{
 		CreateUserUseCase:          createUserUC,
 		LoginUserUseCase:           loginUserUC,
 		RefreshTokenUseCase:        refreshTokenUC,
 		LoginUserWithGoogleUseCase: loginWithGoogleUserUC,
+		LangNormalizer:             langNormalizer,
 	}
 
 	router.POST("/auth/register", handler.RegisterUser)
@@ -51,6 +54,10 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	rawLang := c.GetHeader("Accept-Language")
+	normalizedLang := h.LangNormalizer.Normalize(rawLang)
+
+	input.PreferredLang = normalizedLang
 
 	user, err := h.CreateUserUseCase.Execute(input)
 
@@ -113,6 +120,11 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 // @Router /auth/login/google [post]
 func (h *AuthHandler) LoginUserWithGoogle(c *gin.Context) {
 	var input userUseCase.LoginUserWithGoogleInput
+
+	rawLang := c.GetHeader("Accept-Language")
+	normalizedLang := h.LangNormalizer.Normalize(rawLang)
+
+	input.PreferredLang = normalizedLang
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

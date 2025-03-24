@@ -8,8 +8,10 @@ import (
 	_ "jamlink-backend/docs"
 	"jamlink-backend/internal/adapter/http"
 	"jamlink-backend/internal/infra/db"
+	emailinfra "jamlink-backend/internal/infra/email"
 	userRepository "jamlink-backend/internal/modules/user/repository"
 	userUsecase "jamlink-backend/internal/modules/user/usecase"
+	"jamlink-backend/internal/shared/lang"
 	"jamlink-backend/internal/shared/security"
 )
 
@@ -18,7 +20,6 @@ import (
 // @description This is an API with Swagger and Gin.
 // @host localhost:8080
 // @BasePath /
-
 func main() {
 	_ = godotenv.Load()
 	database := db.ConnectDB()
@@ -29,9 +30,11 @@ func main() {
 
 	// Services
 	securityService := security.NewSecurityService()
+	emailService := emailinfra.NewBrevoEmailService()
+	langService := lang.NewLangNormalizer()
 
 	// Use Cases
-	createUserUseCase := userUsecase.NewCreateUserUseCase(userRepo, securityService)
+	createUserUseCase := userUsecase.NewCreateUserUseCase(userRepo, securityService, emailService)
 	loginUserUseCase := userUsecase.NewLoginUserUseCase(userRepo, securityService)
 	loginUserWithGoogleUseCase := userUsecase.NewLoginUserWithGoogleUseCase(userRepo, securityService)
 	refreshTokenUseCase := userUsecase.NewRefreshTokenUseCase(securityService)
@@ -39,7 +42,7 @@ func main() {
 	// Setup router
 	r := gin.Default()
 
-	http.NewAuthHandler(r, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase)
+	http.NewAuthHandler(r, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 
 	// Run server

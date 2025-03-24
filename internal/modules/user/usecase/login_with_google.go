@@ -10,7 +10,8 @@ import (
 )
 
 type LoginUserWithGoogleInput struct {
-	IDToken string `json:"id_token" binding:"required"`
+	IDToken       string `json:"id_token" binding:"required"`
+	PreferredLang string `gorm:"type:varchar(5);default:'en'" json:"-"`
 }
 
 type LoginUserWithGoogleOutput struct {
@@ -56,7 +57,7 @@ func (uc *LoginUserWithGoogleUseCase) Execute(input LoginUserWithGoogleInput) (*
 			return nil, err
 		}
 
-		user, err = userDomain.CreateUser(email, hashed)
+		user, err = userDomain.CreateUser(email, hashed, input.PreferredLang)
 		if err != nil {
 			return nil, err
 		}

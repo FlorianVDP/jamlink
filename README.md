@@ -1,6 +1,6 @@
 # 🎶 JamLink Backend
 
-🔒 JamLink is a Go (Gin) backend API built to manage users and animals, featuring JWT-based authentication, PostgreSQL for persistent storage, and a Domain-Driven Design (DDD) architecture.
+🔒 JamLink is a Go (Gin) backend API built to manage musiciens, featuring JWT-based authentication, PostgreSQL for persistent storage, and a Domain-Driven Design (DDD) architecture.
 ---
 ## 📌 Table of Contents
 - [🚀 Installation](#-installation)

@@ -17,7 +17,7 @@ func TestCreateUser_Success(t *testing.T) {
 
 	input := CreateUserInput{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "Password123@",
 	}
 
 	mockRepo.On("FindByEmail", input.Email).Return(nil, errors.New("user not found"))
@@ -27,9 +27,10 @@ func TestCreateUser_Success(t *testing.T) {
 	user, err := useCase.Execute(input)
 
 	assert.NoError(t, err)
-	assert.NotNil(t, user)
-	assert.Equal(t, input.Email, user.Email)
-	assert.Equal(t, "hashedpassword123", user.Password)
+	if assert.NotNil(t, user) {
+		assert.Equal(t, input.Email, user.Email)
+		assert.Equal(t, "hashedpassword123", user.Password)
+	}
 }
 
 func TestCreateUser_EmailAlreadyExists(t *testing.T) {
@@ -40,7 +41,7 @@ func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 
 	input := CreateUserInput{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "Password123@",
 	}
 
 	mockRepo.On("FindByEmail", input.Email).Return(&userDomain.User{Email: input.Email}, nil)
@@ -60,7 +61,7 @@ func TestCreateUser_FailOnHashing(t *testing.T) {
 
 	input := CreateUserInput{
 		Email:    "test@example.com",
-		Password: "password123",
+		Password: "Password123@",
 	}
 
 	mockRepo.On("FindByEmail", input.Email).Return(nil, errors.New("user not found"))

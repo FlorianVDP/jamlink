@@ -21,17 +21,26 @@ func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseC
 	}
 
 	router.POST("/auth/register", handler.RegisterUser)
-	router.GET("/auth/login", handler.LoginUser)
+	router.POST("/auth/login", handler.LoginUser)
 	router.POST("/auth/refresh-token", handler.RefreshToken)
 }
 
 // RegisterUser register a new user
-// @Summary Post a new user
-// @Description Register a new user with email and password
+// @Summary Register a new user
+// @Description Create a new user account.
+// @Description Password must:
+// @Description - Be between 8 and 64 characters
+// @Description - Contain at least one uppercase letter
+// @Description - Contain at least one lowercase letter
+// @Description - Contain at least one digit
+// @Description - Contain at least one special character (e.g. !@#$%^&*)
 // @Tags Auth
+// @Accept json
 // @Produce json
+// @Param input body userUseCase.CreateUserInput true "User credentials"
 // @Success 201 {object} userDomain.User
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /auth/register [post]
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	var input userUseCase.CreateUserInput
@@ -52,12 +61,15 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 
 // LoginUser login a user
 // @Summary Login a user
-// @Description Login a user with email and password
+// @Description Authenticate a user with email and password and store the refresh token (stored in HttpOnly cookie named 'refresh_token')
 // @Tags Auth
+// @Accept json
 // @Produce json
+// @Param credentials body userUseCase.LoginUserInput true "Login credentials"
 // @Success 200 {object} userUseCase.LoginUserOutput
-// @Failure 404 {object} map[string]string
-// @Router /auth/login [get]
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth/login [post]
 func (h *AuthHandler) LoginUser(c *gin.Context) {
 	var input userUseCase.LoginUserInput
 
@@ -87,11 +99,11 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 
 // RefreshToken refresh a token for a user
 // @Summary Refresh a token
-// @Description Refresh a token for a user
+// @Description Refresh the JWT token using the refresh token (stored in HttpOnly cookie named 'refresh_token')
 // @Tags Auth
 // @Produce json
 // @Success 200 {object} userUseCase.RefreshTokenOutput
-// @Failure 404 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Router /auth/refresh-token [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	cookie, err := c.Request.Cookie("refresh_token")

@@ -9,7 +9,7 @@ type RefreshTokenInput struct {
 }
 
 type RefreshTokenOutput struct {
-	Token        string `json:"token"`
+	Token        string `json:"token" example:"eyJhbGciOi..."`
 	RefreshToken string `json:"-"`
 }
 

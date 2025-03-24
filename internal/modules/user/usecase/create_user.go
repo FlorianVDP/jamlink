@@ -2,6 +2,7 @@ package userUseCase
 
 import (
 	"jamlink-backend/internal/modules/user/domain"
+	userInvariants "jamlink-backend/internal/modules/user/domain/invariants"
 	"jamlink-backend/internal/shared/security"
 )
 
@@ -15,8 +16,8 @@ func NewCreateUserUseCase(repo userDomain.UserRepository, security security.Secu
 }
 
 type CreateUserInput struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required,email" example:"user@example.com"`
+	Password string `json:"password" binding:"required" example:"Abcd1234!"`
 }
 
 func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*userDomain.User, error) {
@@ -24,6 +25,10 @@ func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*userDomain.User, e
 
 	if err == nil {
 		return nil, userDomain.ErrEmailAlreadyExists
+	}
+
+	if err := userInvariants.ValidateUser(input.Email, input.Password); err != nil {
+		return nil, err
 	}
 
 	hashedPassword, err := uc.security.HashPassword(input.Password)

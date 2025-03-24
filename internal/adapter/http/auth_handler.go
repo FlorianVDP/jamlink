@@ -3,29 +3,38 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"jamlink-backend/internal/modules/user/usecase"
+	"jamlink-backend/internal/shared/lang"
 	"net/http"
 	"time"
 )
 
 type AuthHandler struct {
-	CreateUserUseCase          *userUseCase.CreateUserUseCase
-	LoginUserUseCase           *userUseCase.LoginUserUseCase
-	LoginUserWithGoogleUseCase *userUseCase.LoginUserWithGoogleUseCase
-	RefreshTokenUseCase        *userUseCase.RefreshTokenUseCase
+	CreateUserUseCase           *userUseCase.CreateUserUseCase
+	LoginUserUseCase            *userUseCase.LoginUserUseCase
+	LoginUserWithGoogleUseCase  *userUseCase.LoginUserWithGoogleUseCase
+	RefreshTokenUseCase         *userUseCase.RefreshTokenUseCase
+	VerifyUserUseCase           *userUseCase.VerifyUserUseCase
+	GetVerificationTokenUseCase *userUseCase.GetVerificationEmailUseCase
+	LangNormalizer              lang.LangNormalizer
 }
 
-func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase) {
+func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.GetVerificationEmailUseCase) {
 	handler := &AuthHandler{
-		CreateUserUseCase:          createUserUC,
-		LoginUserUseCase:           loginUserUC,
-		RefreshTokenUseCase:        refreshTokenUC,
-		LoginUserWithGoogleUseCase: loginWithGoogleUserUC,
+		CreateUserUseCase:           createUserUC,
+		LoginUserUseCase:            loginUserUC,
+		RefreshTokenUseCase:         refreshTokenUC,
+		LoginUserWithGoogleUseCase:  loginWithGoogleUserUC,
+		VerifyUserUseCase:           verifyUserUC,
+		GetVerificationTokenUseCase: getVerificationTokenUC,
+		LangNormalizer:              langNormalizer,
 	}
 
 	router.POST("/auth/register", handler.RegisterUser)
 	router.POST("/auth/login", handler.LoginUser)
 	router.POST("/auth/login/google", handler.LoginUserWithGoogle)
 	router.POST("/auth/refresh-token", handler.RefreshToken)
+	router.POST("/auth/verify", handler.VerifyUser)
+	router.POST("/auth/get-verification-token", handler.GetVerificationToken)
 }
 
 // RegisterUser register a new user
@@ -51,7 +60,10 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	rawLang := c.GetHeader("Accept-Language")
+	normalizedLang := h.LangNormalizer.Normalize(rawLang)
 
+	input.PreferredLang = normalizedLang
 	user, err := h.CreateUserUseCase.Execute(input)
 
 	if err != nil {
@@ -114,6 +126,11 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 func (h *AuthHandler) LoginUserWithGoogle(c *gin.Context) {
 	var input userUseCase.LoginUserWithGoogleInput
 
+	rawLang := c.GetHeader("Accept-Language")
+	normalizedLang := h.LangNormalizer.Normalize(rawLang)
+
+	input.PreferredLang = normalizedLang
+
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -173,4 +190,65 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	})
 
 	c.JSON(http.StatusOK, output)
+}
+
+// VerifyUser verify a user
+// @Summary Verify a user
+// @Description Verify a user account using the token received in the email
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param input body userUseCase.VerifyUserInput true "Verification token"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/verify [post]
+func (h *AuthHandler) VerifyUser(c *gin.Context) {
+
+	var input userUseCase.VerifyUserInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.VerifyUserUseCase.Execute(input)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+
+}
+
+// GetVerificationToken get a verification token
+// @Summary Get a verification token
+// @Description Get a verification token for a user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param input body userUseCase.GetVerificationEmailInput true "User email"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/get-verification-token [post]
+func (h *AuthHandler) GetVerificationToken(c *gin.Context) {
+	var input userUseCase.GetVerificationEmailInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.GetVerificationTokenUseCase.Execute(input)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

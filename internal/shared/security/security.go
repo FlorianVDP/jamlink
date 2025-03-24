@@ -2,6 +2,7 @@ package security
 
 import (
 	"encoding/base64"
+	"errors"
 	"github.com/google/uuid"
 	"os"
 	"time"
@@ -19,6 +20,7 @@ type SecurityService interface {
 	ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	GetJWTInfo(tokenString string) (uuid.UUID, error)
 	GenerateSecureRandomString(n int) (string, error)
+	GenerateVerificationJWT(email string) (string, error)
 }
 
 type securityService struct{}
@@ -86,6 +88,26 @@ func (s *securityService) ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	}
 
 	return claims, nil
+}
+
+func (s *securityService) GenerateVerificationJWT(email string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": email,
+		"exp":   time.Now().Add(24 * time.Hour).Unix(),
+	})
+	return token.SignedString(jwtSecret)
+}
+
+func (s *securityService) ParseVerificationJWT(tokenStr string) (string, error) {
+	claims, err := s.ValidateJWT(tokenStr)
+	if err != nil {
+		return "", err
+	}
+	email, ok := claims["email"].(string)
+	if !ok {
+		return "", errors.New("invalid token: missing email")
+	}
+	return email, nil
 }
 
 func (s *securityService) GetJWTInfo(tokenString string) (uuid.UUID, error) {

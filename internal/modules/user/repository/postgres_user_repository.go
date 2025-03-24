@@ -26,3 +26,7 @@ func (r *PostgresUserRepository) FindByEmail(email string) (*userDomain.User, er
 
 	return &user, nil
 }
+
+func (r *PostgresUserRepository) Update(user *userDomain.User) error {
+	return r.db.Save(user).Error
+}

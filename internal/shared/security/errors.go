@@ -17,7 +17,8 @@ var (
 	ErrCannotExtractClaims     = errors.New("unable to extract claims from token")
 
 	// JWT Claims parsing
-	ErrInvalidUserID = errors.New("invalid or missing user ID in JWT claims")
+	ErrInvalidUserID    = errors.New("invalid or missing user ID in JWT claims")
+	ErrInvalidUserEmail = errors.New("invalid or missing email in JWT claims")
 
 	// Secure Random Generation
 	ErrSecureRandomGeneration = errors.New("failed to generate secure random string")

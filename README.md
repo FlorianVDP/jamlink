@@ -7,6 +7,7 @@
 - [📂 Architecture](#-architecture)
 - [✅ Testing and code quality](#-testing-and-code-quality)
 - [📚 Swagger – API Documentation](#-swagger--api-Documentation)
+- [Services](#-services)
 ---
 
 ## 🚀 Installation
@@ -128,3 +129,33 @@ go run cmd/api/main.go
 - Always include: @Summary, @Description, @Tags, @Success, @Router
 - Run swag init every time you change your routes
 - Do not expose /swagger in production — or secure it with auth
+## Services
+### 📧 Email Sending with Brevo
+We use [Brevo](https://www.brevo.com/) (formerly Sendinblue) to send transactional emails such as account verification.
+#### 🧩 Architecture
+```
+[ UseCase ]
+   ↓
+[ EmailService (interface) ]
+   ↓
+[ BrevoEmailService (implementation) ]
+   ↓
+[ Brevo API ]
+```
+#### 🧱 Template Handling
+Email templates are written directly in Go code (no separate HTML files).
+Each template is defined in a dedicated file inside internal/shared/email/.
+
+Example files:
+- template_verification.go → verification email
+- Add more templates by following the same pattern.
+##### ➕ Adding a New Email Template
+1. Declare a new constant in email_template.go:
+2. Create a new file template_welcome.go in the same folder.
+3. Create new HTML content in `shared/email/template`.
+4. Call the template from a use case:
+```
+emailService.Send(user.Email, email.TemplateWelcome, user.PreferredLang, map[string]string{
+    "URL": "https://...",
+})
+```

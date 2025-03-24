@@ -13,15 +13,17 @@ type AuthHandler struct {
 	LoginUserUseCase           *userUseCase.LoginUserUseCase
 	LoginUserWithGoogleUseCase *userUseCase.LoginUserWithGoogleUseCase
 	RefreshTokenUseCase        *userUseCase.RefreshTokenUseCase
+	VerifyUserUseCase          *userUseCase.VerifyUserUseCase
 	LangNormalizer             lang.LangNormalizer
 }
 
-func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase) {
+func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase) {
 	handler := &AuthHandler{
 		CreateUserUseCase:          createUserUC,
 		LoginUserUseCase:           loginUserUC,
 		RefreshTokenUseCase:        refreshTokenUC,
 		LoginUserWithGoogleUseCase: loginWithGoogleUserUC,
+		VerifyUserUseCase:          verifyUserUC,
 		LangNormalizer:             langNormalizer,
 	}
 
@@ -29,6 +31,7 @@ func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, crea
 	router.POST("/auth/login", handler.LoginUser)
 	router.POST("/auth/login/google", handler.LoginUserWithGoogle)
 	router.POST("/auth/refresh-token", handler.RefreshToken)
+	router.POST("/auth/verify", handler.VerifyUser)
 }
 
 // RegisterUser register a new user
@@ -185,4 +188,36 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	})
 
 	c.JSON(http.StatusOK, output)
+}
+
+// VerifyUser verify a user
+// @Summary Verify a user
+// @Description Verify a user account using the token received in the email
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param input body userUseCase.VerifyUserInput true "Verification token"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/verify [post]
+func (h *AuthHandler) VerifyUser(c *gin.Context) {
+
+	var input userUseCase.VerifyUserInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.VerifyUserUseCase.Execute(input)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+
 }

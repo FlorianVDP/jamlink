@@ -22,3 +22,8 @@ func (m *MockUserRepository) Create(user *userDomain.User) error {
 	args := m.Called(user)
 	return args.Error(0)
 }
+
+func (m *MockUserRepository) Update(user *userDomain.User) error {
+	args := m.Called(user)
+	return args.Error(0)
+}

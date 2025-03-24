@@ -39,3 +39,8 @@ func (m *MockSecurityService) GetJWTInfo(token string) (uuid.UUID, error) {
 	args := m.Called(token)
 	return args.Get(0).(uuid.UUID), args.Error(1)
 }
+
+func (m *MockSecurityService) GenerateSecureRandomString(n int) (string, error) {
+	args := m.Called(n)
+	return args.Get(0).(string), args.Error(1)
+}

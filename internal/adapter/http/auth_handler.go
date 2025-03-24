@@ -8,20 +8,23 @@ import (
 )
 
 type AuthHandler struct {
-	CreateUserUseCase   *userUseCase.CreateUserUseCase
-	LoginUserUseCase    *userUseCase.LoginUserUseCase
-	RefreshTokenUseCase *userUseCase.RefreshTokenUseCase
+	CreateUserUseCase          *userUseCase.CreateUserUseCase
+	LoginUserUseCase           *userUseCase.LoginUserUseCase
+	LoginUserWithGoogleUseCase *userUseCase.LoginUserWithGoogleUseCase
+	RefreshTokenUseCase        *userUseCase.RefreshTokenUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase) {
+func NewAuthHandler(router *gin.Engine, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase) {
 	handler := &AuthHandler{
-		CreateUserUseCase:   createUserUC,
-		LoginUserUseCase:    loginUserUC,
-		RefreshTokenUseCase: refreshTokenUC,
+		CreateUserUseCase:          createUserUC,
+		LoginUserUseCase:           loginUserUC,
+		RefreshTokenUseCase:        refreshTokenUC,
+		LoginUserWithGoogleUseCase: loginWithGoogleUserUC,
 	}
 
 	router.POST("/auth/register", handler.RegisterUser)
 	router.POST("/auth/login", handler.LoginUser)
+	router.POST("/auth/login/google", handler.LoginUserWithGoogle)
 	router.POST("/auth/refresh-token", handler.RefreshToken)
 }
 
@@ -79,6 +82,44 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 	}
 
 	output, err := h.LoginUserUseCase.Execute(input)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    output.RefreshToken,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	})
+
+	c.JSON(http.StatusOK, output.Token)
+}
+
+// LoginUserWithGoogle login a user with Google account
+// @Summary Login a user with Google account
+// @Description Authenticate a user with Google account and store the refresh token (stored in HttpOnly cookie named 'refresh_token')
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param credentials body userUseCase.LoginUserWithGoogleInput true "Login credentials"
+// @Success 200 {object} userUseCase.LoginUserWithGoogleOutput
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth/login/google [post]
+func (h *AuthHandler) LoginUserWithGoogle(c *gin.Context) {
+	var input userUseCase.LoginUserWithGoogleInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	output, err := h.LoginUserWithGoogleUseCase.Execute(input)
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

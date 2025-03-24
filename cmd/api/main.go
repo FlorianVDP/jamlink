@@ -33,12 +33,13 @@ func main() {
 	// Use Cases
 	createUserUseCase := userUsecase.NewCreateUserUseCase(userRepo, securityService)
 	loginUserUseCase := userUsecase.NewLoginUserUseCase(userRepo, securityService)
+	loginUserWithGoogleUseCase := userUsecase.NewLoginUserWithGoogleUseCase(userRepo, securityService)
 	refreshTokenUseCase := userUsecase.NewRefreshTokenUseCase(securityService)
 
 	// Setup router
 	r := gin.Default()
 
-	http.NewAuthHandler(r, createUserUseCase, loginUserUseCase, refreshTokenUseCase)
+	http.NewAuthHandler(r, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 
 	// Run server

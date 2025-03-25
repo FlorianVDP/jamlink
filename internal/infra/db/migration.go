@@ -10,6 +10,7 @@ func MigrateDB(db *gorm.DB) {
 	log.Println("🚀 Running global database migrations...")
 
 	userinfra.MigrateUserTable(db)
+	userinfra.MigrateTokenTable(db)
 
 	log.Println("✅ All migrations completed successfully!")
 }

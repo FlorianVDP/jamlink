@@ -40,7 +40,7 @@ func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, err
 	}
 
 	if !uc.security.CheckPassword(input.Password, user.Password) {
-		return nil, ErrInvalidEmailOrPassword
+		return nil, security.ErrPasswordComparison
 	}
 
 	token, err := uc.security.GenerateJWT(&user.ID, nil, time.Minute*15, "login")

@@ -15,10 +15,11 @@ type AuthHandler struct {
 	RefreshTokenUseCase         *userUseCase.RefreshTokenUseCase
 	VerifyUserUseCase           *userUseCase.VerifyUserUseCase
 	GetVerificationTokenUseCase *userUseCase.GetVerificationEmailUseCase
+	RequestResetPasswordUseCase *userUseCase.RequestResetPasswordUseCase
 	LangNormalizer              lang.LangNormalizer
 }
 
-func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.GetVerificationEmailUseCase) {
+func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.GetVerificationEmailUseCase, requestResetPasswordUC *userUseCase.RequestResetPasswordUseCase) {
 	handler := &AuthHandler{
 		CreateUserUseCase:           createUserUC,
 		LoginUserUseCase:            loginUserUC,
@@ -26,6 +27,7 @@ func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, crea
 		LoginUserWithGoogleUseCase:  loginWithGoogleUserUC,
 		VerifyUserUseCase:           verifyUserUC,
 		GetVerificationTokenUseCase: getVerificationTokenUC,
+		RequestResetPasswordUseCase: requestResetPasswordUC,
 		LangNormalizer:              langNormalizer,
 	}
 
@@ -35,6 +37,7 @@ func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, crea
 	router.POST("/auth/refresh-token", handler.RefreshToken)
 	router.POST("/auth/verify", handler.VerifyUser)
 	router.POST("/auth/get-verification-token", handler.GetVerificationToken)
+	router.POST("/auth/request-reset-password", handler.RequestResetPassword)
 }
 
 // RegisterUser register a new user
@@ -244,6 +247,35 @@ func (h *AuthHandler) GetVerificationToken(c *gin.Context) {
 	}
 
 	err := h.GetVerificationTokenUseCase.Execute(input)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+// RequestResetPassword request a password reset email
+// @Summary Request a password reset email
+// @Description Request a password reset email for a user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param input body userUseCase.RequestResetPasswordInput true "User email"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/request-reset-password [post]
+func (h *AuthHandler) RequestResetPassword(c *gin.Context) {
+	var input userUseCase.RequestResetPasswordInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.RequestResetPasswordUseCase.Execute(input)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

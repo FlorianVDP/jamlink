@@ -2,6 +2,7 @@ package userUseCase
 
 import (
 	"errors"
+	"jamlink-backend/internal/shared/security"
 	"testing"
 	"time"
 
@@ -64,7 +65,7 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, output)
-	assert.ErrorIs(t, err, ErrInvalidEmailOrPassword)
+	assert.ErrorIs(t, err, security.ErrPasswordComparison)
 
 }
 

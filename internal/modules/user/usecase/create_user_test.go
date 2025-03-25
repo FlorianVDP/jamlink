@@ -6,16 +6,14 @@ import (
 	"github.com/stretchr/testify/mock"
 	"jamlink-backend/internal/modules/user/domain"
 	"jamlink-backend/internal/modules/user/mocks"
-	"jamlink-backend/internal/shared/email"
 	"testing"
 )
 
 func TestCreateUser_Success(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
-	mockEmail := new(mocks.MockEmailService)
 
-	useCase := NewCreateUserUseCase(mockRepo, mockSecurity, mockEmail)
+	useCase := NewCreateUserUseCase(mockRepo, mockSecurity)
 
 	input := CreateUserInput{
 		Email:         "test@example.com",
@@ -26,8 +24,6 @@ func TestCreateUser_Success(t *testing.T) {
 	mockRepo.On("FindByEmail", input.Email).Return(nil, errors.New("user not found"))
 	mockSecurity.On("HashPassword", input.Password).Return("hashedpassword123", nil)
 	mockRepo.On("Create", mock.Anything).Return(nil)
-	mockSecurity.On("GenerateVerificationJWT", input.Email).Return("test@example.com", nil)
-	mockEmail.On("Send", input.Email, email.TemplateVerification, "fr-FR", map[string]string{"URL": "?token=test@example.com"}).Return(nil)
 	user, err := useCase.Execute(input)
 
 	assert.NoError(t, err)
@@ -40,9 +36,8 @@ func TestCreateUser_Success(t *testing.T) {
 func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
-	mockEmail := new(mocks.MockEmailService)
 
-	useCase := NewCreateUserUseCase(mockRepo, mockSecurity, mockEmail)
+	useCase := NewCreateUserUseCase(mockRepo, mockSecurity)
 
 	input := CreateUserInput{
 		Email:         "test@example.com",
@@ -62,9 +57,8 @@ func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 func TestCreateUser_FailOnHashing(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
-	mockEmail := new(mocks.MockEmailService)
 
-	useCase := NewCreateUserUseCase(mockRepo, mockSecurity, mockEmail)
+	useCase := NewCreateUserUseCase(mockRepo, mockSecurity)
 
 	input := CreateUserInput{
 		Email:         "test@example.com",

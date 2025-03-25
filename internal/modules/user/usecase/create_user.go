@@ -3,18 +3,16 @@ package userUseCase
 import (
 	"jamlink-backend/internal/modules/user/domain"
 	userInvariants "jamlink-backend/internal/modules/user/domain/invariants"
-	"jamlink-backend/internal/shared/email"
 	"jamlink-backend/internal/shared/security"
 )
 
 type CreateUserUseCase struct {
 	repo     userDomain.UserRepository
 	security security.SecurityService
-	email    email.EmailService
 }
 
-func NewCreateUserUseCase(repo userDomain.UserRepository, security security.SecurityService, email email.EmailService) *CreateUserUseCase {
-	return &CreateUserUseCase{repo: repo, security: security, email: email}
+func NewCreateUserUseCase(repo userDomain.UserRepository, security security.SecurityService) *CreateUserUseCase {
+	return &CreateUserUseCase{repo: repo, security: security}
 }
 
 type CreateUserInput struct {

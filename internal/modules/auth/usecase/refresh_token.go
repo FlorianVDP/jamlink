@@ -2,6 +2,7 @@ package userUseCase
 
 import (
 	"jamlink-backend/internal/shared/security"
+	"time"
 )
 
 type RefreshTokenInput struct {
@@ -30,12 +31,12 @@ func (uc *RefreshTokenUseCase) Execute(input RefreshTokenInput) (*RefreshTokenOu
 		return nil, err
 	}
 
-	token, err := uc.security.GenerateJWT(userId)
+	token, err := uc.security.GenerateJWT(&userId, nil, time.Minute*15, "login")
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := uc.security.GenerateRefreshJWT(userId)
+	refreshToken, err := uc.security.GenerateJWT(&userId, nil, time.Hour*24*7, "refresh_token")
 	if err != nil {
 		return nil, err
 	}

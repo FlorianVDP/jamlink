@@ -1,7 +1,7 @@
 package userUseCase
 
 import (
-	userDomain "jamlink-backend/internal/modules/user/domain"
+	userDomain "jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/shared/security"
 	"time"
 )

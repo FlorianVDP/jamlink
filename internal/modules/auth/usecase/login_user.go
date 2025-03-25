@@ -2,8 +2,9 @@ package userUseCase
 
 import (
 	"errors"
-	userDomain "jamlink-backend/internal/modules/user/domain"
+	userDomain "jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/shared/security"
+	"time"
 )
 
 var (
@@ -29,7 +30,7 @@ type LoginUserInput struct {
 
 type LoginUserOutput struct {
 	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"-"`
 }
 
 func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, error) {
@@ -39,16 +40,16 @@ func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, err
 	}
 
 	if !uc.security.CheckPassword(input.Password, user.Password) {
-		return nil, ErrInvalidEmailOrPassword
+		return nil, security.ErrPasswordComparison
 	}
 
-	token, err := uc.security.GenerateJWT(user.ID)
+	token, err := uc.security.GenerateJWT(&user.ID, nil, time.Minute*15, "login")
 
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := uc.security.GenerateRefreshJWT(user.ID)
+	refreshToken, err := uc.security.GenerateJWT(&user.ID, nil, time.Hour*24*7, "refresh_token")
 	if err != nil {
 		return nil, err
 	}

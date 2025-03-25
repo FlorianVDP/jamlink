@@ -9,8 +9,8 @@ import (
 	"jamlink-backend/internal/adapter/http"
 	"jamlink-backend/internal/infra/db"
 	emailinfra "jamlink-backend/internal/infra/email"
-	userRepository "jamlink-backend/internal/modules/user/repository"
-	userUsecase "jamlink-backend/internal/modules/user/usecase"
+	userRepository "jamlink-backend/internal/modules/auth/repository"
+	userUsecase "jamlink-backend/internal/modules/auth/usecase"
 	"jamlink-backend/internal/shared/lang"
 	"jamlink-backend/internal/shared/security"
 )
@@ -27,6 +27,7 @@ func main() {
 
 	// Repositories
 	userRepo := userRepository.NewPostgresUserRepository(database)
+	tokenRepo := userRepository.NewPostgresTokenRepository(database)
 
 	// Services
 	securityService := security.NewSecurityService()
@@ -34,17 +35,19 @@ func main() {
 	langService := lang.NewLangNormalizer()
 
 	// Use Cases
-	createUserUseCase := userUsecase.NewCreateUserUseCase(userRepo, securityService, emailService)
+	createUserUseCase := userUsecase.NewCreateUserUseCase(userRepo, securityService)
 	loginUserUseCase := userUsecase.NewLoginUserUseCase(userRepo, securityService)
 	loginUserWithGoogleUseCase := userUsecase.NewLoginUserWithGoogleUseCase(userRepo, securityService)
 	refreshTokenUseCase := userUsecase.NewRefreshTokenUseCase(securityService)
 	getVerificationTokenUseCase := userUsecase.NewGetVerificationEmailUseCase(securityService, userRepo, emailService)
 	verifyUserUseCase := userUsecase.NewVerifyUserUseCase(userRepo, securityService)
+	requestResetPasswordUseCase := userUsecase.NewRequestResetPasswordUseCase(tokenRepo, userRepo, securityService, emailService)
+	resetPasswordUseCase := userUsecase.NewResetPasswordUseCase(tokenRepo, userRepo, securityService)
 
 	// Setup router
 	r := gin.Default()
 
-	http.NewAuthHandler(r, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase, getVerificationTokenUseCase)
+	http.NewAuthHandler(r, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase, getVerificationTokenUseCase, requestResetPasswordUseCase, resetPasswordUseCase)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 
 	// Run server

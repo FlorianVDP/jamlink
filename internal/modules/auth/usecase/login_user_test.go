@@ -2,20 +2,22 @@ package userUseCase
 
 import (
 	"errors"
+	"jamlink-backend/internal/modules/auth/domain/user"
+	"jamlink-backend/internal/shared/security"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"jamlink-backend/internal/modules/user/domain"
-	"jamlink-backend/internal/modules/user/mocks"
+	"jamlink-backend/internal/modules/auth/mocks"
 )
 
 func TestLoginUser_Success(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
 
-	user := &userDomain.User{
+	user := &user.User{
 		ID:       uuid.New(),
 		Email:    "test@example.com",
 		Password: "hashedpassword",
@@ -28,8 +30,9 @@ func TestLoginUser_Success(t *testing.T) {
 
 	mockRepo.On("FindByEmail", input.Email).Return(user, nil)
 	mockSecurity.On("CheckPassword", input.Password, user.Password).Return(true)
-	mockSecurity.On("GenerateJWT", user.ID).Return("mocked.jwt.token", nil)
-	mockSecurity.On("GenerateRefreshJWT", user.ID).Return("mocked.jwt.token", nil)
+
+	mockSecurity.On("GenerateJWT", &user.ID, (*string)(nil), time.Minute*15, "login").Return("mocked.jwt.token", nil)
+	mockSecurity.On("GenerateJWT", &user.ID, (*string)(nil), time.Hour*24*7, "refresh_token").Return("mocked.jwt.token", nil)
 
 	usecase := NewLoginUserUseCase(mockRepo, mockSecurity)
 	output, err := usecase.Execute(input)
@@ -43,7 +46,7 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
 
-	user := &userDomain.User{
+	user := &user.User{
 		ID:       uuid.New(),
 		Email:    "test@example.com",
 		Password: "hashedpassword",
@@ -62,7 +65,7 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, output)
-	assert.ErrorIs(t, err, ErrInvalidEmailOrPassword)
+	assert.ErrorIs(t, err, security.ErrPasswordComparison)
 
 }
 

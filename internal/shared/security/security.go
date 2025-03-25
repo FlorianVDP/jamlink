@@ -15,12 +15,10 @@ import (
 type SecurityService interface {
 	HashPassword(password string) (string, error)
 	CheckPassword(password, hash string) bool
-	GenerateJWT(id uuid.UUID) (string, error)
-	GenerateRefreshJWT(id uuid.UUID) (string, error)
+	GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string) (string, error)
 	ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	GetJWTInfo(tokenString string) (uuid.UUID, error)
 	GenerateSecureRandomString(n int) (string, error)
-	GenerateVerificationJWT(email string) (string, error)
 }
 
 type securityService struct{}
@@ -43,30 +41,31 @@ func (s *securityService) HashPassword(password string) (string, error) {
 
 func (s *securityService) CheckPassword(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+
 	return err == nil
 }
 
-func (s *securityService) GenerateJWT(id uuid.UUID) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  id.String(),
-		"exp": time.Now().Add(15 * time.Minute).Unix(),
-	})
+func (s *securityService) GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string) (string, error) {
+	claims := jwt.MapClaims{
+		"iat":  time.Now().Unix(),
+		"exp":  time.Now().Add(duration).Unix(),
+		"type": tokenType,
+	}
+
+	if id != nil {
+		claims["id"] = id.String()
+	}
+	if email != nil {
+		claims["email"] = *email
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	tokenString, err := token.SignedString(jwtSecret)
 	if err != nil {
 		return "", ErrJWTGeneration
 	}
-	return tokenString, nil
-}
 
-func (s *securityService) GenerateRefreshJWT(id uuid.UUID) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  id.String(),
-		"exp": time.Now().Add(7 * 24 * time.Hour).Unix(),
-	})
-	tokenString, err := token.SignedString(jwtSecret)
-	if err != nil {
-		return "", ErrRefreshJWTGeneration
-	}
 	return tokenString, nil
 }
 
@@ -88,14 +87,6 @@ func (s *securityService) ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	}
 
 	return claims, nil
-}
-
-func (s *securityService) GenerateVerificationJWT(email string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": email,
-		"exp":   time.Now().Add(24 * time.Hour).Unix(),
-	})
-	return token.SignedString(jwtSecret)
 }
 
 func (s *securityService) ParseVerificationJWT(tokenStr string) (string, error) {

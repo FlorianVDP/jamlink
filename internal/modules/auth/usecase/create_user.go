@@ -1,20 +1,18 @@
 package userUseCase
 
 import (
-	"jamlink-backend/internal/modules/user/domain"
-	userInvariants "jamlink-backend/internal/modules/user/domain/invariants"
-	"jamlink-backend/internal/shared/email"
+	"jamlink-backend/internal/modules/auth/domain/user"
+	"jamlink-backend/internal/modules/auth/domain/user/invariants"
 	"jamlink-backend/internal/shared/security"
 )
 
 type CreateUserUseCase struct {
-	repo     userDomain.UserRepository
+	repo     user.UserRepository
 	security security.SecurityService
-	email    email.EmailService
 }
 
-func NewCreateUserUseCase(repo userDomain.UserRepository, security security.SecurityService, email email.EmailService) *CreateUserUseCase {
-	return &CreateUserUseCase{repo: repo, security: security, email: email}
+func NewCreateUserUseCase(repo user.UserRepository, security security.SecurityService) *CreateUserUseCase {
+	return &CreateUserUseCase{repo: repo, security: security}
 }
 
 type CreateUserInput struct {
@@ -23,11 +21,11 @@ type CreateUserInput struct {
 	PreferredLang string `gorm:"type:varchar(5);default:'en'" json:"-"`
 }
 
-func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*userDomain.User, error) {
+func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*user.User, error) {
 	_, err := uc.repo.FindByEmail(input.Email)
 
 	if err == nil {
-		return nil, userDomain.ErrEmailAlreadyExists
+		return nil, user.ErrEmailAlreadyExists
 	}
 
 	if err := userInvariants.ValidateUser(input.Email, input.Password); err != nil {
@@ -40,7 +38,7 @@ func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*userDomain.User, e
 		return nil, err
 	}
 
-	user, err := userDomain.CreateUser(input.Email, hashedPassword, input.PreferredLang, "local")
+	user, err := user.CreateUser(input.Email, hashedPassword, input.PreferredLang, "local")
 	if err != nil {
 		return nil, err
 	}

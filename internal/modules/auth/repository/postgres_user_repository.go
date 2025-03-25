@@ -2,7 +2,7 @@ package userRepository
 
 import (
 	"gorm.io/gorm"
-	"jamlink-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/modules/auth/domain/user"
 )
 
 type PostgresUserRepository struct {
@@ -13,12 +13,12 @@ func NewPostgresUserRepository(db *gorm.DB) *PostgresUserRepository {
 	return &PostgresUserRepository{db: db}
 }
 
-func (r *PostgresUserRepository) Create(user *userDomain.User) error {
+func (r *PostgresUserRepository) Create(user *user.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *PostgresUserRepository) FindByEmail(email string) (*userDomain.User, error) {
-	var user userDomain.User
+func (r *PostgresUserRepository) FindByEmail(email string) (*user.User, error) {
+	var user user.User
 
 	if err := r.db.Where("email  = ?", email).First(&user).Error; err != nil {
 		return nil, err
@@ -27,6 +27,6 @@ func (r *PostgresUserRepository) FindByEmail(email string) (*userDomain.User, er
 	return &user, nil
 }
 
-func (r *PostgresUserRepository) Update(user *userDomain.User) error {
+func (r *PostgresUserRepository) Update(user *user.User) error {
 	return r.db.Save(user).Error
 }

@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"github.com/stretchr/testify/mock"
-	"jamlink-backend/internal/modules/user/domain"
+	userDomain "jamlink-backend/internal/modules/auth/domain/user"
 )
 
 type MockUserRepository struct {
@@ -11,11 +11,11 @@ type MockUserRepository struct {
 
 func (m *MockUserRepository) FindByEmail(email string) (*userDomain.User, error) {
 	args := m.Called(email)
-	user := args.Get(0)
-	if user == nil {
+	foundUser := args.Get(0)
+	if foundUser == nil {
 		return nil, args.Error(1)
 	}
-	return user.(*userDomain.User), args.Error(1)
+	return foundUser.(*userDomain.User), args.Error(1)
 }
 
 func (m *MockUserRepository) Create(user *userDomain.User) error {

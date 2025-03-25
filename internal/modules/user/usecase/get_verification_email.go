@@ -7,6 +7,7 @@ import (
 	"jamlink-backend/internal/shared/email"
 	"jamlink-backend/internal/shared/security"
 	"os"
+	"time"
 )
 
 type GetVerificationEmailUseCase struct {
@@ -30,7 +31,7 @@ func (uc *GetVerificationEmailUseCase) Execute(input GetVerificationEmailInput) 
 		return userDomain.ErrUserNotFound
 	}
 
-	token, err := uc.security.GenerateVerificationJWT(input.Email)
+	token, err := uc.security.GenerateJWT(nil, &input.Email, time.Hour*24, "verify_email")
 	if err != nil {
 		return err
 	}

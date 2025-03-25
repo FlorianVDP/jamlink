@@ -7,6 +7,7 @@ import (
 	userDomain "jamlink-backend/internal/modules/user/domain"
 	"jamlink-backend/internal/shared/security"
 	"os"
+	"time"
 )
 
 type LoginUserWithGoogleInput struct {
@@ -68,12 +69,12 @@ func (uc *LoginUserWithGoogleUseCase) Execute(input LoginUserWithGoogleInput) (*
 		}
 	}
 
-	token, err := uc.security.GenerateJWT(user.ID)
+	token, err := uc.security.GenerateJWT(&user.ID, nil, time.Minute*15, "login")
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := uc.security.GenerateRefreshJWT(user.ID)
+	refreshToken, err := uc.security.GenerateJWT(&user.ID, nil, time.Hour*24*7, "refresh_token")
 	if err != nil {
 		return nil, err
 	}

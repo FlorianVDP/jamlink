@@ -4,6 +4,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
+	"time"
 )
 
 type MockSecurityService struct {
@@ -20,18 +21,8 @@ func (m *MockSecurityService) CheckPassword(password, hash string) bool {
 	return args.Bool(0)
 }
 
-func (m *MockSecurityService) GenerateJWT(id uuid.UUID) (string, error) {
-	args := m.Called(id)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockSecurityService) GenerateRefreshJWT(id uuid.UUID) (string, error) {
-	args := m.Called(id)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockSecurityService) GenerateVerificationJWT(email string) (string, error) {
-	args := m.Called(email)
+func (m *MockSecurityService) GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string) (string, error) {
+	args := m.Called(id, email, duration, tokenType)
 	return args.String(0), args.Error(1)
 }
 

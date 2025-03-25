@@ -4,6 +4,7 @@ import (
 	"jamlink-backend/internal/modules/user/mocks"
 	"jamlink-backend/internal/shared/security"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -18,8 +19,9 @@ func TestRefreshToken_Success(t *testing.T) {
 	newRefreshToken := "new.refresh.token"
 
 	mockSecurity.On("GetJWTInfo", refreshToken).Return(userID, nil)
-	mockSecurity.On("GenerateJWT", userID).Return(newAccessToken, nil)
-	mockSecurity.On("GenerateRefreshJWT", userID).Return(newRefreshToken, nil)
+
+	mockSecurity.On("GenerateJWT", &userID, (*string)(nil), time.Minute*15, "login").Return(newAccessToken, nil)
+	mockSecurity.On("GenerateJWT", &userID, (*string)(nil), time.Hour*24*7, "refresh_token").Return(newRefreshToken, nil)
 
 	usecase := NewRefreshTokenUseCase(mockSecurity)
 
@@ -53,7 +55,7 @@ func TestRefreshToken_JWTGenerationFails(t *testing.T) {
 	userID := uuid.New()
 
 	mockSecurity.On("GetJWTInfo", refreshToken).Return(userID, nil)
-	mockSecurity.On("GenerateJWT", userID).Return("", security.ErrJWTGeneration)
+	mockSecurity.On("GenerateJWT", &userID, (*string)(nil), time.Minute*15, "login").Return("", security.ErrJWTGeneration)
 
 	usecase := NewRefreshTokenUseCase(mockSecurity)
 
@@ -71,13 +73,14 @@ func TestRefreshToken_RefreshJWTGenerationFails(t *testing.T) {
 	accessToken := "new.jwt.token"
 
 	mockSecurity.On("GetJWTInfo", refreshToken).Return(userID, nil)
-	mockSecurity.On("GenerateJWT", userID).Return(accessToken, nil)
-	mockSecurity.On("GenerateRefreshJWT", userID).Return("", security.ErrRefreshJWTGeneration)
+
+	mockSecurity.On("GenerateJWT", &userID, (*string)(nil), time.Minute*15, "login").Return(accessToken, nil)
+	mockSecurity.On("GenerateJWT", &userID, (*string)(nil), time.Hour*24*7, "refresh_token").Return("", security.ErrJWTGeneration)
 
 	usecase := NewRefreshTokenUseCase(mockSecurity)
 
 	output, err := usecase.Execute(RefreshTokenInput{RefreshToken: refreshToken})
 
-	assert.ErrorIs(t, err, security.ErrRefreshJWTGeneration)
+	assert.ErrorIs(t, err, security.ErrJWTGeneration)
 	assert.Nil(t, output)
 }

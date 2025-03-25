@@ -4,6 +4,7 @@ import (
 	"errors"
 	userDomain "jamlink-backend/internal/modules/user/domain"
 	"jamlink-backend/internal/shared/security"
+	"time"
 )
 
 var (
@@ -42,13 +43,13 @@ func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, err
 		return nil, ErrInvalidEmailOrPassword
 	}
 
-	token, err := uc.security.GenerateJWT(user.ID)
+	token, err := uc.security.GenerateJWT(&user.ID, nil, time.Minute*15, "login")
 
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := uc.security.GenerateRefreshJWT(user.ID)
+	refreshToken, err := uc.security.GenerateJWT(&user.ID, nil, time.Hour*24*7, "refresh_token")
 	if err != nil {
 		return nil, err
 	}

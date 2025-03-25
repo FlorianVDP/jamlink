@@ -8,8 +8,7 @@ var (
 	ErrPasswordComparison = errors.New("password does not match")
 
 	// JWT Generation
-	ErrJWTGeneration        = errors.New("failed to generate JWT")
-	ErrRefreshJWTGeneration = errors.New("failed to generate refresh JWT")
+	ErrJWTGeneration = errors.New("failed to generate JWT")
 
 	// JWT Validation
 	ErrInvalidJWTSigningMethod = errors.New("unexpected JWT signing method")

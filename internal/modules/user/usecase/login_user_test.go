@@ -3,6 +3,7 @@ package userUseCase
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -28,8 +29,9 @@ func TestLoginUser_Success(t *testing.T) {
 
 	mockRepo.On("FindByEmail", input.Email).Return(user, nil)
 	mockSecurity.On("CheckPassword", input.Password, user.Password).Return(true)
-	mockSecurity.On("GenerateJWT", user.ID).Return("mocked.jwt.token", nil)
-	mockSecurity.On("GenerateRefreshJWT", user.ID).Return("mocked.jwt.token", nil)
+
+	mockSecurity.On("GenerateJWT", &user.ID, (*string)(nil), time.Minute*15, "login").Return("mocked.jwt.token", nil)
+	mockSecurity.On("GenerateJWT", &user.ID, (*string)(nil), time.Hour*24*7, "refresh_token").Return("mocked.jwt.token", nil)
 
 	usecase := NewLoginUserUseCase(mockRepo, mockSecurity)
 	output, err := usecase.Execute(input)

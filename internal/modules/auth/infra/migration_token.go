@@ -1,7 +1,7 @@
 package userinfra
 
 import (
-	"jamlink-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/modules/auth/domain/token"
 	"log"
 
 	"gorm.io/gorm"
@@ -10,7 +10,7 @@ import (
 func MigrateTokenTable(db *gorm.DB) {
 	log.Println("🚀 Running Token Table Migration...")
 
-	err := db.AutoMigrate(&userDomain.Token{})
+	err := db.AutoMigrate(&token.Token{})
 	if err != nil {
 		log.Fatalf("❌ Token table migration failed: %v", err)
 	}

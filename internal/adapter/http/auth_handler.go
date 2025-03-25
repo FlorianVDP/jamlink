@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"jamlink-backend/internal/modules/user/usecase"
+	"jamlink-backend/internal/modules/auth/usecase"
 	"jamlink-backend/internal/shared/lang"
 	"net/http"
 	"time"
@@ -56,7 +56,7 @@ func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, crea
 // @Accept json
 // @Produce json
 // @Param input body userUseCase.CreateUserInput true "User credentials"
-// @Success 201 {object} userDomain.User
+// @Success 201 {object} user.User
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/register [post]

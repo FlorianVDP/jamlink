@@ -9,8 +9,8 @@ import (
 	"jamlink-backend/internal/adapter/http"
 	"jamlink-backend/internal/infra/db"
 	emailinfra "jamlink-backend/internal/infra/email"
-	userRepository "jamlink-backend/internal/modules/user/repository"
-	userUsecase "jamlink-backend/internal/modules/user/usecase"
+	userRepository "jamlink-backend/internal/modules/auth/repository"
+	userUsecase "jamlink-backend/internal/modules/auth/usecase"
 	"jamlink-backend/internal/shared/lang"
 	"jamlink-backend/internal/shared/security"
 )

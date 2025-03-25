@@ -3,7 +3,7 @@ package userUseCase
 import (
 	"errors"
 	"fmt"
-	userDomain "jamlink-backend/internal/modules/user/domain"
+	"jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/shared/email"
 	"jamlink-backend/internal/shared/security"
 	"os"
@@ -13,22 +13,22 @@ import (
 type GetVerificationEmailUseCase struct {
 	security security.SecurityService
 	email    email.EmailService
-	repo     userDomain.UserRepository
+	repo     user.UserRepository
 }
 
 type GetVerificationEmailInput struct {
 	Email string `json:"email" binding:"required,email" example:"user@example.com"`
 }
 
-func NewGetVerificationEmailUseCase(security security.SecurityService, repo userDomain.UserRepository, email email.EmailService) *GetVerificationEmailUseCase {
+func NewGetVerificationEmailUseCase(security security.SecurityService, repo user.UserRepository, email email.EmailService) *GetVerificationEmailUseCase {
 	return &GetVerificationEmailUseCase{security: security, repo: repo, email: email}
 }
 
 func (uc *GetVerificationEmailUseCase) Execute(input GetVerificationEmailInput) error {
-	user, err := uc.repo.FindByEmail(input.Email)
+	foundUser, err := uc.repo.FindByEmail(input.Email)
 
 	if err != nil {
-		return userDomain.ErrUserNotFound
+		return user.ErrUserNotFound
 	}
 
 	token, err := uc.security.GenerateJWT(nil, &input.Email, time.Hour*24, "verify_email")
@@ -36,11 +36,11 @@ func (uc *GetVerificationEmailUseCase) Execute(input GetVerificationEmailInput) 
 		return err
 	}
 
-	if user.Verification.IsVerified || user.Verification.VerifiedAt != nil {
+	if foundUser.Verification.IsVerified || foundUser.Verification.VerifiedAt != nil {
 		return errors.New("your account is already verified")
 	}
 
-	err = uc.email.Send(user.Email, email.TemplateVerification, user.PreferredLang, map[string]string{
+	err = uc.email.Send(foundUser.Email, email.TemplateVerification, foundUser.PreferredLang, map[string]string{
 		"URL": fmt.Sprintf("%s?token=%s", os.Getenv("FRONTEND_VERIFY_URL"), token),
 	})
 

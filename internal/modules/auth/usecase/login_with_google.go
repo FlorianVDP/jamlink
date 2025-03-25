@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"google.golang.org/api/idtoken"
-	userDomain "jamlink-backend/internal/modules/user/domain"
+	user2 "jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/shared/security"
 	"os"
 	"time"
@@ -17,15 +17,15 @@ type LoginUserWithGoogleInput struct {
 
 type LoginUserWithGoogleOutput struct {
 	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"-"`
 }
 
 type LoginUserWithGoogleUseCase struct {
-	repo     userDomain.UserRepository
+	repo     user2.UserRepository
 	security security.SecurityService
 }
 
-func NewLoginUserWithGoogleUseCase(repo userDomain.UserRepository, security security.SecurityService) *LoginUserWithGoogleUseCase {
+func NewLoginUserWithGoogleUseCase(repo user2.UserRepository, security security.SecurityService) *LoginUserWithGoogleUseCase {
 	return &LoginUserWithGoogleUseCase{
 		repo:     repo,
 		security: security,
@@ -58,7 +58,7 @@ func (uc *LoginUserWithGoogleUseCase) Execute(input LoginUserWithGoogleInput) (*
 			return nil, err
 		}
 
-		user, err = userDomain.CreateUser(email, hashed, input.PreferredLang, "google")
+		user, err = user2.CreateUser(email, hashed, input.PreferredLang, "google")
 		if err != nil {
 			return nil, err
 		}

@@ -1,4 +1,4 @@
-package userDomain
+package token
 
 import "github.com/google/uuid"
 

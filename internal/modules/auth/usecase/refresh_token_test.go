@@ -1,7 +1,7 @@
 package userUseCase
 
 import (
-	"jamlink-backend/internal/modules/user/mocks"
+	"jamlink-backend/internal/modules/auth/mocks"
 	"jamlink-backend/internal/shared/security"
 	"testing"
 	"time"

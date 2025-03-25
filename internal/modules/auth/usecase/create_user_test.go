@@ -4,8 +4,8 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"jamlink-backend/internal/modules/user/domain"
-	"jamlink-backend/internal/modules/user/mocks"
+	"jamlink-backend/internal/modules/auth/domain/user"
+	"jamlink-backend/internal/modules/auth/mocks"
 	"testing"
 )
 
@@ -45,7 +45,7 @@ func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 		PreferredLang: "fr-FR",
 	}
 
-	mockRepo.On("FindByEmail", input.Email).Return(&userDomain.User{Email: input.Email}, nil)
+	mockRepo.On("FindByEmail", input.Email).Return(&user.User{Email: input.Email}, nil)
 
 	user, err := useCase.Execute(input)
 

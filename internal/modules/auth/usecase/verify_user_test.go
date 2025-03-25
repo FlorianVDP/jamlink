@@ -3,14 +3,14 @@ package userUseCase
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
-	"jamlink-backend/internal/modules/user/mocks"
+	userDomain "jamlink-backend/internal/modules/auth/domain/user"
+	"jamlink-backend/internal/modules/auth/mocks"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	userDomain "jamlink-backend/internal/modules/user/domain"
 	"jamlink-backend/internal/shared/security"
 )
 
@@ -45,7 +45,7 @@ func TestVerifyUserUseCase_Execute_Success(t *testing.T) {
 		Return(user, nil)
 
 	mockRepo.
-		On("Update", mock.AnythingOfType("*userDomain.User")).
+		On("Update", mock.AnythingOfType("*user.User")).
 		Return(nil)
 
 	err := verifyUC.Execute(input)

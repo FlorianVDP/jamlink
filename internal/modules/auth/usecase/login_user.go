@@ -2,7 +2,7 @@ package userUseCase
 
 import (
 	"errors"
-	userDomain "jamlink-backend/internal/modules/user/domain"
+	userDomain "jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/shared/security"
 	"time"
 )
@@ -30,7 +30,7 @@ type LoginUserInput struct {
 
 type LoginUserOutput struct {
 	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"-"`
 }
 
 func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, error) {

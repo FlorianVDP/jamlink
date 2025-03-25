@@ -2,7 +2,7 @@ package db
 
 import (
 	"gorm.io/gorm"
-	userinfra "jamlink-backend/internal/modules/user/infra"
+	userinfra "jamlink-backend/internal/modules/auth/infra"
 	"log"
 )
 

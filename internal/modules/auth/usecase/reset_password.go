@@ -2,8 +2,9 @@ package userUseCase
 
 import (
 	"errors"
-	userDomain "jamlink-backend/internal/modules/user/domain"
-	userInvariants "jamlink-backend/internal/modules/user/domain/invariants"
+	userDomain "jamlink-backend/internal/modules/auth/domain/token"
+	"jamlink-backend/internal/modules/auth/domain/user"
+	"jamlink-backend/internal/modules/auth/domain/user/invariants"
 	"jamlink-backend/internal/shared/security"
 	"time"
 )
@@ -16,7 +17,7 @@ var (
 
 type ResetPasswordUseCase struct {
 	tokenRepo userDomain.TokenRepository
-	userRepo  userDomain.UserRepository
+	userRepo  user.UserRepository
 	security  security.SecurityService
 }
 
@@ -26,7 +27,7 @@ type ResetPasswordInput struct {
 	NewPasswordValidation string `json:"new_password_validation" binding:"required"`
 }
 
-func NewResetPasswordUseCase(tokenRepo userDomain.TokenRepository, userRepo userDomain.UserRepository, security security.SecurityService) *ResetPasswordUseCase {
+func NewResetPasswordUseCase(tokenRepo userDomain.TokenRepository, userRepo user.UserRepository, security security.SecurityService) *ResetPasswordUseCase {
 	return &ResetPasswordUseCase{tokenRepo, userRepo, security}
 }
 

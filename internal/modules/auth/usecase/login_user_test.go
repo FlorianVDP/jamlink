@@ -2,6 +2,7 @@ package userUseCase
 
 import (
 	"errors"
+	"jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/shared/security"
 	"testing"
 	"time"
@@ -9,15 +10,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"jamlink-backend/internal/modules/user/domain"
-	"jamlink-backend/internal/modules/user/mocks"
+	"jamlink-backend/internal/modules/auth/mocks"
 )
 
 func TestLoginUser_Success(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
 
-	user := &userDomain.User{
+	user := &user.User{
 		ID:       uuid.New(),
 		Email:    "test@example.com",
 		Password: "hashedpassword",
@@ -46,7 +46,7 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
 
-	user := &userDomain.User{
+	user := &user.User{
 		ID:       uuid.New(),
 		Email:    "test@example.com",
 		Password: "hashedpassword",

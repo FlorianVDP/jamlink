@@ -3,7 +3,7 @@ package userRepository
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	userDomain "jamlink-backend/internal/modules/user/domain"
+	tokenDomain "jamlink-backend/internal/modules/auth/domain/token"
 )
 
 type PostgresTokenRepository struct {
@@ -14,12 +14,12 @@ func NewPostgresTokenRepository(db *gorm.DB) *PostgresTokenRepository {
 	return &PostgresTokenRepository{db: db}
 }
 
-func (r *PostgresTokenRepository) Create(token *userDomain.Token) error {
+func (r *PostgresTokenRepository) Create(token *tokenDomain.Token) error {
 	return r.db.Create(token).Error
 }
 
-func (r *PostgresTokenRepository) FindByToken(token string) (*userDomain.Token, error) {
-	var t userDomain.Token
+func (r *PostgresTokenRepository) FindByToken(token string) (*tokenDomain.Token, error) {
+	var t tokenDomain.Token
 
 	if err := r.db.Where("token  = ?", token).First(&t).Error; err != nil {
 		return nil, err
@@ -29,5 +29,5 @@ func (r *PostgresTokenRepository) FindByToken(token string) (*userDomain.Token, 
 }
 
 func (r *PostgresTokenRepository) DeleteByID(id uuid.UUID) error {
-	return r.db.Where("id = ?", id).Delete(&userDomain.Token{}).Error
+	return r.db.Where("id = ?", id).Delete(&tokenDomain.Token{}).Error
 }

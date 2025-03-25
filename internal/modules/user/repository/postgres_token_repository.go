@@ -28,6 +28,6 @@ func (r *PostgresTokenRepository) FindByToken(token string) (*userDomain.Token, 
 	return &t, nil
 }
 
-func (r *PostgresTokenRepository) DeleteByUserID(userID uuid.UUID) error {
-	return r.db.Where("user_id = ?", userID).Delete(&userDomain.Token{}).Error
+func (r *PostgresTokenRepository) DeleteByID(id uuid.UUID) error {
+	return r.db.Where("id = ?", id).Delete(&userDomain.Token{}).Error
 }

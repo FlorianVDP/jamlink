@@ -15,7 +15,7 @@ import (
 type SecurityService interface {
 	HashPassword(password string) (string, error)
 	CheckPassword(password, hash string) bool
-	GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string) (string, error)
+	GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string, isVerified bool) (string, error)
 	ValidateJWT(tokenString string) (jwt.MapClaims, error)
 	GetJWTInfo(tokenString string) (uuid.UUID, error)
 	GenerateSecureRandomString(n int) (string, error)
@@ -45,11 +45,12 @@ func (s *securityService) CheckPassword(password, hash string) bool {
 	return err == nil
 }
 
-func (s *securityService) GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string) (string, error) {
+func (s *securityService) GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string, isVerified bool) (string, error) {
 	claims := jwt.MapClaims{
-		"iat":  time.Now().Unix(),
-		"exp":  time.Now().Add(duration).Unix(),
-		"type": tokenType,
+		"iat":        time.Now().Unix(),
+		"exp":        time.Now().Add(duration).Unix(),
+		"type":       tokenType,
+		"isVerified": isVerified,
 	}
 
 	if id != nil {

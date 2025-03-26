@@ -11,30 +11,30 @@ import (
 )
 
 type AuthHandler struct {
-	securitySvc                 security.SecurityService
-	LangNormalizer              lang.LangNormalizer
-	CreateUserUseCase           *userUseCase.CreateUserUseCase
-	LoginUserUseCase            *userUseCase.LoginUserUseCase
-	LoginUserWithGoogleUseCase  *userUseCase.LoginUserWithGoogleUseCase
-	RefreshTokenUseCase         *userUseCase.RefreshTokenUseCase
-	VerifyUserUseCase           *userUseCase.VerifyUserUseCase
-	GetVerificationTokenUseCase *userUseCase.GetVerificationEmailUseCase
-	RequestResetPasswordUseCase *userUseCase.RequestResetPasswordUseCase
-	ResetPasswordUseCase        *userUseCase.ResetPasswordUseCase
+	securitySvc                   security.SecurityService
+	LangNormalizer                lang.LangNormalizer
+	CreateUserUseCase             *userUseCase.CreateUserUseCase
+	LoginUserUseCase              *userUseCase.LoginUserUseCase
+	LoginUserWithGoogleUseCase    *userUseCase.LoginUserWithGoogleUseCase
+	RefreshTokenUseCase           *userUseCase.RefreshTokenUseCase
+	VerifyUserUseCase             *userUseCase.VerifyUserUseCase
+	RequestVerifyUserEmailUseCase *userUseCase.RequestVerifyUserEmailUseCase
+	RequestResetPasswordUseCase   *userUseCase.RequestResetPasswordUseCase
+	ResetPasswordUseCase          *userUseCase.ResetPasswordUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.GetVerificationEmailUseCase, requestResetPasswordUC *userUseCase.RequestResetPasswordUseCase, resetPasswordUseCase *userUseCase.ResetPasswordUseCase) {
+func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.RequestVerifyUserEmailUseCase, requestResetPasswordUC *userUseCase.RequestResetPasswordUseCase, resetPasswordUseCase *userUseCase.ResetPasswordUseCase) {
 	handler := &AuthHandler{
-		securitySvc:                 securitySvc,
-		LangNormalizer:              langNormalizer,
-		CreateUserUseCase:           createUserUC,
-		LoginUserUseCase:            loginUserUC,
-		RefreshTokenUseCase:         refreshTokenUC,
-		LoginUserWithGoogleUseCase:  loginWithGoogleUserUC,
-		VerifyUserUseCase:           verifyUserUC,
-		GetVerificationTokenUseCase: getVerificationTokenUC,
-		RequestResetPasswordUseCase: requestResetPasswordUC,
-		ResetPasswordUseCase:        resetPasswordUseCase,
+		securitySvc:                   securitySvc,
+		LangNormalizer:                langNormalizer,
+		CreateUserUseCase:             createUserUC,
+		LoginUserUseCase:              loginUserUC,
+		RefreshTokenUseCase:           refreshTokenUC,
+		LoginUserWithGoogleUseCase:    loginWithGoogleUserUC,
+		VerifyUserUseCase:             verifyUserUC,
+		RequestVerifyUserEmailUseCase: getVerificationTokenUC,
+		RequestResetPasswordUseCase:   requestResetPasswordUC,
+		ResetPasswordUseCase:          resetPasswordUseCase,
 	}
 
 	router.POST("/auth/register", handler.RegisterUser)
@@ -42,16 +42,16 @@ func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, la
 	router.POST("/auth/login/google", handler.LoginUserWithGoogle)
 	router.POST("/auth/refresh-token", handler.RefreshToken)
 	router.POST("/auth/verify", handler.VerifyUser)
-	router.POST("/auth/get-verification-token", handler.GetVerificationToken)
+	router.POST("/auth/request-verify-user", handler.RequestVerifyUserEmail)
 	router.POST("/auth/request-reset-password", handler.RequestResetPassword)
 	router.POST("/auth/reset-password", handler.ResetPassword)
 
 	// Protected routes
 	protected := router.Group("/")
 	protected.Use(middleware.JWTAuthMiddleware(securitySvc))
-	protected.GET("/hello", func(c *gin.Context) {
+	/*protected.GET("/hello", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Hello World"})
-	})
+	})*/
 
 }
 
@@ -242,26 +242,26 @@ func (h *AuthHandler) VerifyUser(c *gin.Context) {
 
 }
 
-// GetVerificationToken get a verification token
+// RequestVerifyUserEmail get a verification token
 // @Summary Get a verification token
 // @Description Get a verification token for a user
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param input body userUseCase.GetVerificationEmailInput true "User email"
+// @Param input body userUseCase.RequestVerifyUserEmailInput true "User email"
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/get-verification-token [post]
-func (h *AuthHandler) GetVerificationToken(c *gin.Context) {
-	var input userUseCase.GetVerificationEmailInput
+func (h *AuthHandler) RequestVerifyUserEmail(c *gin.Context) {
+	var input userUseCase.RequestVerifyUserEmailInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.GetVerificationTokenUseCase.Execute(input)
+	err := h.RequestVerifyUserEmailUseCase.Execute(input)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

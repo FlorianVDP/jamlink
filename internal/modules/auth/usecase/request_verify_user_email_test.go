@@ -53,10 +53,10 @@ func TestGetVerificationEmail_Success(t *testing.T) {
 		})).Return(nil)
 
 	// Create the use case
-	useCase := NewGetVerificationEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
+	useCase := NewRequestVerifyUserEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
 
 	// Act
-	err := useCase.Execute(GetVerificationEmailInput{
+	err := useCase.Execute(RequestVerifyUserEmailInput{
 		Email: userEmail,
 	})
 
@@ -78,10 +78,10 @@ func TestGetVerificationEmail_UserNotFound(t *testing.T) {
 	mockUserRepo.On("FindByEmail", userEmail).Return(nil, errors.New("user not found"))
 
 	// Create the use case
-	useCase := NewGetVerificationEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
+	useCase := NewRequestVerifyUserEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
 
 	// Act
-	err := useCase.Execute(GetVerificationEmailInput{
+	err := useCase.Execute(RequestVerifyUserEmailInput{
 		Email: userEmail,
 	})
 
@@ -121,10 +121,10 @@ func TestGetVerificationEmail_AlreadyVerified(t *testing.T) {
 		true).Return(jwtToken, nil)
 
 	// Create the use case
-	useCase := NewGetVerificationEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
+	useCase := NewRequestVerifyUserEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
 
 	// Act
-	err := useCase.Execute(GetVerificationEmailInput{
+	err := useCase.Execute(RequestVerifyUserEmailInput{
 		Email: userEmail,
 	})
 
@@ -162,10 +162,10 @@ func TestGetVerificationEmail_JWTGenerationFailure(t *testing.T) {
 		false).Return("", errors.New("jwt generation error"))
 
 	// Create the use case
-	useCase := NewGetVerificationEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
+	useCase := NewRequestVerifyUserEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
 
 	// Act
-	err := useCase.Execute(GetVerificationEmailInput{
+	err := useCase.Execute(RequestVerifyUserEmailInput{
 		Email: userEmail,
 	})
 
@@ -218,10 +218,10 @@ func TestGetVerificationEmail_EmailSendingFailure(t *testing.T) {
 		})).Return(errors.New("email sending error"))
 
 	// Create the use case
-	useCase := NewGetVerificationEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
+	useCase := NewRequestVerifyUserEmailUseCase(mockSecurity, mockUserRepo, mockEmailService)
 
 	// Act
-	err := useCase.Execute(GetVerificationEmailInput{
+	err := useCase.Execute(RequestVerifyUserEmailInput{
 		Email: userEmail,
 	})
 

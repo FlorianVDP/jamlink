@@ -58,7 +58,7 @@ func (uc *ResetPasswordUseCase) Execute(input ResetPasswordInput) error {
 
 	token, err := uc.tokenRepo.FindByToken(input.Token)
 	if err != nil {
-		return err
+		return tokenDomain.ErrTokenNotFound
 	}
 
 	user, err := uc.userRepo.FindByEmail(email)

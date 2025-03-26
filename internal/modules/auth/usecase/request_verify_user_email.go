@@ -10,21 +10,21 @@ import (
 	"time"
 )
 
-type GetVerificationEmailUseCase struct {
+type RequestVerifyUserEmailUseCase struct {
 	security security.SecurityService
 	email    email.EmailService
 	repo     user.UserRepository
 }
 
-type GetVerificationEmailInput struct {
+type RequestVerifyUserEmailInput struct {
 	Email string `json:"email" binding:"required,email" example:"user@example.com"`
 }
 
-func NewGetVerificationEmailUseCase(security security.SecurityService, repo user.UserRepository, email email.EmailService) *GetVerificationEmailUseCase {
-	return &GetVerificationEmailUseCase{security: security, repo: repo, email: email}
+func NewRequestVerifyUserEmailUseCase(security security.SecurityService, repo user.UserRepository, email email.EmailService) *RequestVerifyUserEmailUseCase {
+	return &RequestVerifyUserEmailUseCase{security: security, repo: repo, email: email}
 }
 
-func (uc *GetVerificationEmailUseCase) Execute(input GetVerificationEmailInput) error {
+func (uc *RequestVerifyUserEmailUseCase) Execute(input RequestVerifyUserEmailInput) error {
 	foundUser, err := uc.repo.FindByEmail(input.Email)
 
 	if err != nil {

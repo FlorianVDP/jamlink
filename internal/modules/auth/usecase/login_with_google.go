@@ -69,12 +69,12 @@ func (uc *LoginUserWithGoogleUseCase) Execute(input LoginUserWithGoogleInput) (*
 		}
 	}
 
-	token, err := uc.security.GenerateJWT(&user.ID, nil, time.Minute*15, "login")
+	token, err := uc.security.GenerateJWT(&user.ID, nil, time.Minute*15, "login", user.Verification.IsVerified)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := uc.security.GenerateJWT(&user.ID, nil, time.Hour*24*7, "refresh_token")
+	refreshToken, err := uc.security.GenerateJWT(&user.ID, nil, time.Hour*24*7, "refresh_token", user.Verification.IsVerified)
 	if err != nil {
 		return nil, err
 	}

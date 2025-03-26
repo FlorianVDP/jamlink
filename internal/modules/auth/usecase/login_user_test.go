@@ -2,6 +2,8 @@ package userUseCase
 
 import (
 	"errors"
+	"github.com/stretchr/testify/mock"
+	tokenDomain "jamlink-backend/internal/modules/auth/domain/token"
 	"jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/shared/security"
 	"testing"
@@ -14,13 +16,16 @@ import (
 )
 
 func TestLoginUser_Success(t *testing.T) {
-	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
-
-	user := &user.User{
+	userRepo := new(mocks.MockUserRepository)
+	tokenRepo := new(mocks.MockTokenRepository)
+	createdUser := &user.User{
 		ID:       uuid.New(),
 		Email:    "test@example.com",
 		Password: "hashedpassword",
+		Verification: user.UserVerification{
+			IsVerified: false,
+		},
 	}
 
 	input := LoginUserInput{
@@ -28,23 +33,38 @@ func TestLoginUser_Success(t *testing.T) {
 		Password: "password123",
 	}
 
-	mockRepo.On("FindByEmail", input.Email).Return(user, nil)
-	mockSecurity.On("CheckPassword", input.Password, user.Password).Return(true)
+	const expiringTimeForRefreshToken = time.Hour * 24 * 7
 
-	mockSecurity.On("GenerateJWT", &user.ID, (*string)(nil), time.Minute*15, "login").Return("mocked.jwt.token", nil)
-	mockSecurity.On("GenerateJWT", &user.ID, (*string)(nil), time.Hour*24*7, "refresh_token").Return("mocked.jwt.token", nil)
+	refreshToken := "valid_refresh_token"
+	accessToken := "valid_access_token"
 
-	usecase := NewLoginUserUseCase(mockRepo, mockSecurity)
+	userRepo.On("FindByEmail", input.Email).Return(createdUser, nil)
+	mockSecurity.On("CheckPassword", input.Password, createdUser.Password).Return(true)
+
+	mockSecurity.On("GenerateJWT", &createdUser.ID, (*string)(nil), time.Minute*15, "login", createdUser.Verification.IsVerified).Return(accessToken, nil)
+	mockSecurity.On("GenerateJWT", &createdUser.ID, (*string)(nil), expiringTimeForRefreshToken, "refresh_token", createdUser.Verification.IsVerified).Return(refreshToken, nil)
+
+	tokenRepo.On("Create", mock.MatchedBy(func(token *tokenDomain.Token) bool {
+		return token.UserID == createdUser.ID && token.Token == refreshToken
+	})).Return(nil)
+
+	usecase := NewLoginUserUseCase(userRepo, mockSecurity, tokenRepo)
 	output, err := usecase.Execute(input)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, output)
-	assert.Equal(t, "mocked.jwt.token", output.Token)
+	assert.Equal(t, refreshToken, output.RefreshToken)
+	assert.Equal(t, accessToken, output.Token)
+
+	userRepo.AssertExpectations(t)
+	mockSecurity.AssertExpectations(t)
+	tokenRepo.AssertExpectations(t)
 }
 
 func TestLoginUser_InvalidPassword(t *testing.T) {
-	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
+	userRepo := new(mocks.MockUserRepository)
+	tokenRepo := new(mocks.MockTokenRepository)
 
 	user := &user.User{
 		ID:       uuid.New(),
@@ -57,10 +77,10 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 		Password: "wrongpassword",
 	}
 
-	mockRepo.On("FindByEmail", input.Email).Return(user, nil)
+	userRepo.On("FindByEmail", input.Email).Return(user, nil)
 	mockSecurity.On("CheckPassword", input.Password, user.Password).Return(false)
 
-	usecase := NewLoginUserUseCase(mockRepo, mockSecurity)
+	usecase := NewLoginUserUseCase(userRepo, mockSecurity, tokenRepo)
 	output, err := usecase.Execute(input)
 
 	assert.Error(t, err)
@@ -70,17 +90,18 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 }
 
 func TestLoginUser_UserNotFound(t *testing.T) {
-	mockRepo := new(mocks.MockUserRepository)
 	mockSecurity := new(mocks.MockSecurityService)
+	userRepo := new(mocks.MockUserRepository)
+	tokenRepo := new(mocks.MockTokenRepository)
 
 	input := LoginUserInput{
 		Email:    "notfound@example.com",
 		Password: "password123",
 	}
 
-	mockRepo.On("FindByEmail", input.Email).Return(nil, errors.New("not found"))
+	userRepo.On("FindByEmail", input.Email).Return(nil, errors.New("not found"))
 
-	usecase := NewLoginUserUseCase(mockRepo, mockSecurity)
+	usecase := NewLoginUserUseCase(userRepo, mockSecurity, tokenRepo)
 	output, err := usecase.Execute(input)
 
 	assert.Error(t, err)

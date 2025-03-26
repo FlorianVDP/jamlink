@@ -31,7 +31,7 @@ func (uc *GetVerificationEmailUseCase) Execute(input GetVerificationEmailInput) 
 		return user.ErrUserNotFound
 	}
 
-	token, err := uc.security.GenerateJWT(nil, &input.Email, time.Hour*24, "verify_email")
+	token, err := uc.security.GenerateJWT(nil, &input.Email, time.Hour*24, "verify_email", foundUser.Verification.IsVerified)
 	if err != nil {
 		return err
 	}

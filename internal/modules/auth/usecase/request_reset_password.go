@@ -31,7 +31,7 @@ func (uc *RequestResetPasswordUseCase) Execute(input RequestResetPasswordInput) 
 		return err
 	}
 
-	jwt, err := uc.security.GenerateJWT(&foundUser.ID, &foundUser.Email, time.Minute*15, "reset_password")
+	jwt, err := uc.security.GenerateJWT(&foundUser.ID, &foundUser.Email, time.Minute*15, "reset_password", foundUser.Verification.IsVerified)
 	if err != nil {
 		return err
 	}

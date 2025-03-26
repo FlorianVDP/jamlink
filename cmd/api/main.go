@@ -36,9 +36,9 @@ func main() {
 
 	// Use Cases
 	createUserUseCase := userUsecase.NewCreateUserUseCase(userRepo, securityService)
-	loginUserUseCase := userUsecase.NewLoginUserUseCase(userRepo, securityService)
+	loginUserUseCase := userUsecase.NewLoginUserUseCase(userRepo, securityService, tokenRepo)
 	loginUserWithGoogleUseCase := userUsecase.NewLoginUserWithGoogleUseCase(userRepo, securityService)
-	refreshTokenUseCase := userUsecase.NewRefreshTokenUseCase(securityService)
+	refreshTokenUseCase := userUsecase.NewRefreshTokenUseCase(securityService, userRepo, tokenRepo)
 	getVerificationTokenUseCase := userUsecase.NewGetVerificationEmailUseCase(securityService, userRepo, emailService)
 	verifyUserUseCase := userUsecase.NewVerifyUserUseCase(userRepo, securityService)
 	requestResetPasswordUseCase := userUsecase.NewRequestResetPasswordUseCase(tokenRepo, userRepo, securityService, emailService)
@@ -47,7 +47,7 @@ func main() {
 	// Setup router
 	r := gin.Default()
 
-	http.NewAuthHandler(r, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase, getVerificationTokenUseCase, requestResetPasswordUseCase, resetPasswordUseCase)
+	http.NewAuthHandler(r, securityService, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase, getVerificationTokenUseCase, requestResetPasswordUseCase, resetPasswordUseCase)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 
 	// Run server

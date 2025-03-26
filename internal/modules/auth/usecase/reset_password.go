@@ -1,23 +1,16 @@
 package userUseCase
 
 import (
-	"errors"
-	userDomain "jamlink-backend/internal/modules/auth/domain/token"
-	"jamlink-backend/internal/modules/auth/domain/user"
+	tokenDomain "jamlink-backend/internal/modules/auth/domain/token"
+	userDomain "jamlink-backend/internal/modules/auth/domain/user"
 	"jamlink-backend/internal/modules/auth/domain/user/invariants"
 	"jamlink-backend/internal/shared/security"
 	"time"
 )
 
-var (
-	ErrPasswordDoesntMatch = errors.New("password does not match")
-	ErrTokenType           = errors.New("unexpected token type")
-	ErrTokenExpired        = errors.New("token expired")
-)
-
 type ResetPasswordUseCase struct {
-	tokenRepo userDomain.TokenRepository
-	userRepo  user.UserRepository
+	tokenRepo tokenDomain.TokenRepository
+	userRepo  userDomain.UserRepository
 	security  security.SecurityService
 }
 
@@ -27,13 +20,13 @@ type ResetPasswordInput struct {
 	NewPasswordValidation string `json:"new_password_validation" binding:"required"`
 }
 
-func NewResetPasswordUseCase(tokenRepo userDomain.TokenRepository, userRepo user.UserRepository, security security.SecurityService) *ResetPasswordUseCase {
+func NewResetPasswordUseCase(tokenRepo tokenDomain.TokenRepository, userRepo userDomain.UserRepository, security security.SecurityService) *ResetPasswordUseCase {
 	return &ResetPasswordUseCase{tokenRepo, userRepo, security}
 }
 
 func (uc *ResetPasswordUseCase) Execute(input ResetPasswordInput) error {
 	if input.NewPasswordValidation != input.NewPassword {
-		return ErrPasswordDoesntMatch
+		return tokenDomain.ErrPasswordDoesntMatch
 	}
 
 	if err := userInvariants.ValidatePassword(input.NewPassword); err != nil {
@@ -47,15 +40,15 @@ func (uc *ResetPasswordUseCase) Execute(input ResetPasswordInput) error {
 
 	tokenType, ok := claims["type"].(string)
 	if !ok || tokenType != "reset_password" {
-		return ErrTokenType
+		return tokenDomain.ErrTokenType
 	}
 
 	exp, ok := claims["exp"].(float64)
 	if !ok {
-		return ErrTokenExpired
+		return tokenDomain.ErrTokenExpired
 	}
 	if time.Now().After(time.Unix(int64(exp), 0)) {
-		return ErrTokenExpired
+		return tokenDomain.ErrTokenExpired
 	}
 
 	email, ok := claims["email"].(string)

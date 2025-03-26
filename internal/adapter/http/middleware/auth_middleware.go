@@ -21,8 +21,17 @@ func JWTAuthMiddleware(securitySvc security.SecurityService) gin.HandlerFunc {
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := securitySvc.ValidateJWT(tokenString)
+
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			c.Abort()
+			return
+		}
+
+		isVerified, ok := claims["isVerified"].(bool)
+
+		if !ok || !isVerified {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "your account is not verified"})
 			c.Abort()
 			return
 		}

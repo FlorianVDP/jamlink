@@ -21,8 +21,8 @@ func (m *MockSecurityService) CheckPassword(password, hash string) bool {
 	return args.Bool(0)
 }
 
-func (m *MockSecurityService) GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string) (string, error) {
-	args := m.Called(id, email, duration, tokenType)
+func (m *MockSecurityService) GenerateJWT(id *uuid.UUID, email *string, duration time.Duration, tokenType string, isVerified bool) (string, error) {
+	args := m.Called(id, email, duration, tokenType, isVerified)
 	return args.String(0), args.Error(1)
 }
 

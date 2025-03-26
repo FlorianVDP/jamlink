@@ -2,13 +2,16 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"jamlink-backend/internal/adapter/http/middleware"
 	"jamlink-backend/internal/modules/auth/usecase"
 	"jamlink-backend/internal/shared/lang"
+	"jamlink-backend/internal/shared/security"
 	"net/http"
 	"time"
 )
 
 type AuthHandler struct {
+	securitySvc                 security.SecurityService
 	LangNormalizer              lang.LangNormalizer
 	CreateUserUseCase           *userUseCase.CreateUserUseCase
 	LoginUserUseCase            *userUseCase.LoginUserUseCase
@@ -20,8 +23,9 @@ type AuthHandler struct {
 	ResetPasswordUseCase        *userUseCase.ResetPasswordUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.GetVerificationEmailUseCase, requestResetPasswordUC *userUseCase.RequestResetPasswordUseCase, resetPasswordUseCase *userUseCase.ResetPasswordUseCase) {
+func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.GetVerificationEmailUseCase, requestResetPasswordUC *userUseCase.RequestResetPasswordUseCase, resetPasswordUseCase *userUseCase.ResetPasswordUseCase) {
 	handler := &AuthHandler{
+		securitySvc:                 securitySvc,
 		LangNormalizer:              langNormalizer,
 		CreateUserUseCase:           createUserUC,
 		LoginUserUseCase:            loginUserUC,
@@ -41,6 +45,14 @@ func NewAuthHandler(router *gin.Engine, langNormalizer lang.LangNormalizer, crea
 	router.POST("/auth/get-verification-token", handler.GetVerificationToken)
 	router.POST("/auth/request-reset-password", handler.RequestResetPassword)
 	router.POST("/auth/reset-password", handler.ResetPassword)
+
+	// Protected routes
+	protected := router.Group("/")
+	protected.Use(middleware.JWTAuthMiddleware(securitySvc))
+	protected.GET("/hello", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Hello World"})
+	})
+
 }
 
 // RegisterUser register a new user

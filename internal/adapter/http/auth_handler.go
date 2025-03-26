@@ -13,17 +13,18 @@ import (
 type AuthHandler struct {
 	securitySvc                   security.SecurityService
 	LangNormalizer                lang.LangNormalizer
-	CreateUserUseCase             *userUseCase.CreateUserUseCase
-	LoginUserUseCase              *userUseCase.LoginUserUseCase
-	LoginUserWithGoogleUseCase    *userUseCase.LoginUserWithGoogleUseCase
-	RefreshTokenUseCase           *userUseCase.RefreshTokenUseCase
-	VerifyUserUseCase             *userUseCase.VerifyUserUseCase
-	RequestVerifyUserEmailUseCase *userUseCase.RequestVerifyUserEmailUseCase
-	RequestResetPasswordUseCase   *userUseCase.RequestResetPasswordUseCase
-	ResetPasswordUseCase          *userUseCase.ResetPasswordUseCase
+	CreateUserUseCase             *useCase.CreateUserUseCase
+	LoginUserUseCase              *useCase.LoginUserUseCase
+	LoginUserWithGoogleUseCase    *useCase.LoginUserWithGoogleUseCase
+	RefreshTokenUseCase           *useCase.RefreshTokenUseCase
+	VerifyUserUseCase             *useCase.VerifyUserUseCase
+	RequestVerifyUserEmailUseCase *useCase.RequestVerifyUserEmailUseCase
+	RequestResetPasswordUseCase   *useCase.RequestResetPasswordUseCase
+	ResetPasswordUseCase          *useCase.ResetPasswordUseCase
+	DisconnectUserUseCase         *useCase.DisconnectUserUseCase
 }
 
-func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, langNormalizer lang.LangNormalizer, createUserUC *userUseCase.CreateUserUseCase, loginUserUC *userUseCase.LoginUserUseCase, loginWithGoogleUserUC *userUseCase.LoginUserWithGoogleUseCase, refreshTokenUC *userUseCase.RefreshTokenUseCase, verifyUserUC *userUseCase.VerifyUserUseCase, getVerificationTokenUC *userUseCase.RequestVerifyUserEmailUseCase, requestResetPasswordUC *userUseCase.RequestResetPasswordUseCase, resetPasswordUseCase *userUseCase.ResetPasswordUseCase) {
+func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, langNormalizer lang.LangNormalizer, createUserUC *useCase.CreateUserUseCase, loginUserUC *useCase.LoginUserUseCase, loginWithGoogleUserUC *useCase.LoginUserWithGoogleUseCase, refreshTokenUC *useCase.RefreshTokenUseCase, verifyUserUC *useCase.VerifyUserUseCase, getVerificationTokenUC *useCase.RequestVerifyUserEmailUseCase, requestResetPasswordUC *useCase.RequestResetPasswordUseCase, resetPasswordUseCase *useCase.ResetPasswordUseCase, disconnectUserUseCase *useCase.DisconnectUserUseCase) {
 	handler := &AuthHandler{
 		securitySvc:                   securitySvc,
 		LangNormalizer:                langNormalizer,
@@ -35,6 +36,7 @@ func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, la
 		RequestVerifyUserEmailUseCase: getVerificationTokenUC,
 		RequestResetPasswordUseCase:   requestResetPasswordUC,
 		ResetPasswordUseCase:          resetPasswordUseCase,
+		DisconnectUserUseCase:         disconnectUserUseCase,
 	}
 
 	router.POST("/auth/register", handler.RegisterUser)
@@ -45,13 +47,11 @@ func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, la
 	router.POST("/auth/request-verify-user", handler.RequestVerifyUserEmail)
 	router.POST("/auth/request-reset-password", handler.RequestResetPassword)
 	router.POST("/auth/reset-password", handler.ResetPassword)
+	router.POST("/auth/logout", handler.LogoutUser)
 
 	// Protected routes
 	protected := router.Group("/")
 	protected.Use(middleware.JWTAuthMiddleware(securitySvc))
-	/*protected.GET("/hello", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Hello World"})
-	})*/
 
 }
 
@@ -67,13 +67,13 @@ func NewAuthHandler(router *gin.Engine, securitySvc security.SecurityService, la
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param input body userUseCase.CreateUserInput true "User credentials"
+// @Param input body useCase.CreateUserInput true "User credentials"
 // @Success 201 {object} user.User
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/register [post]
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
-	var input userUseCase.CreateUserInput
+	var input useCase.CreateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -98,13 +98,13 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param credentials body userUseCase.LoginUserInput true "Login credentials"
-// @Success 200 {object} userUseCase.LoginUserOutput
+// @Param credentials body useCase.LoginUserInput true "Login credentials"
+// @Success 200 {object} useCase.LoginUserOutput
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /auth/login [post]
 func (h *AuthHandler) LoginUser(c *gin.Context) {
-	var input userUseCase.LoginUserInput
+	var input useCase.LoginUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -136,13 +136,13 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param credentials body userUseCase.LoginUserWithGoogleInput true "Login credentials"
-// @Success 200 {object} userUseCase.LoginUserWithGoogleOutput
+// @Param credentials body useCase.LoginUserWithGoogleInput true "Login credentials"
+// @Success 200 {object} useCase.LoginUserWithGoogleOutput
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /auth/login/google [post]
 func (h *AuthHandler) LoginUserWithGoogle(c *gin.Context) {
-	var input userUseCase.LoginUserWithGoogleInput
+	var input useCase.LoginUserWithGoogleInput
 
 	rawLang := c.GetHeader("Accept-Language")
 	normalizedLang := h.LangNormalizer.Normalize(rawLang)
@@ -178,7 +178,7 @@ func (h *AuthHandler) LoginUserWithGoogle(c *gin.Context) {
 // @Description Refresh the JWT token using the refresh token (stored in HttpOnly cookie named 'refresh_token')
 // @Tags Auth
 // @Produce json
-// @Success 200 {object} userUseCase.RefreshTokenOutput
+// @Success 200 {object} useCase.RefreshTokenOutput
 // @Failure 401 {object} map[string]string
 // @Router /auth/refresh-token [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
@@ -189,7 +189,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	input := userUseCase.RefreshTokenInput{RefreshToken: cookie.Value}
+	input := useCase.RefreshTokenInput{RefreshToken: cookie.Value}
 
 	output, err := h.RefreshTokenUseCase.Execute(input)
 
@@ -216,7 +216,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param input body userUseCase.VerifyUserInput true "Verification token"
+// @Param input body useCase.VerifyUserInput true "Verification token"
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -224,7 +224,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 // @Router /auth/verify [post]
 func (h *AuthHandler) VerifyUser(c *gin.Context) {
 
-	var input userUseCase.VerifyUserInput
+	var input useCase.VerifyUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -248,13 +248,13 @@ func (h *AuthHandler) VerifyUser(c *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param input body userUseCase.RequestVerifyUserEmailInput true "User email"
+// @Param input body useCase.RequestVerifyUserEmailInput true "User email"
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/get-verification-token [post]
 func (h *AuthHandler) RequestVerifyUserEmail(c *gin.Context) {
-	var input userUseCase.RequestVerifyUserEmailInput
+	var input useCase.RequestVerifyUserEmailInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -277,13 +277,13 @@ func (h *AuthHandler) RequestVerifyUserEmail(c *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param input body userUseCase.RequestResetPasswordInput true "User email"
+// @Param input body useCase.RequestResetPasswordInput true "User email"
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/request-reset-password [post]
 func (h *AuthHandler) RequestResetPassword(c *gin.Context) {
-	var input userUseCase.RequestResetPasswordInput
+	var input useCase.RequestResetPasswordInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -306,14 +306,14 @@ func (h *AuthHandler) RequestResetPassword(c *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param input body userUseCase.ResetPasswordInput true "Reset password credentials"
+// @Param input body useCase.ResetPasswordInput true "Reset password credentials"
 // @Success 200
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/reset-password [post]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
-	var input userUseCase.ResetPasswordInput
+	var input useCase.ResetPasswordInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -326,6 +326,42 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	c.Status(http.StatusOK)
+}
+
+// LogoutUser logout a user
+// @Summary Logout a user
+// @Description Logout a user and delete the refresh token
+// @Tags Auth
+// @Produce json
+// @Success 200
+// @Failure 401 {object} map[string]string
+// @Router /auth/logout [post]
+func (h *AuthHandler) LogoutUser(c *gin.Context) {
+	cookie, err := c.Request.Cookie("refresh_token")
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No refresh token"})
+		return
+	}
+	input := &useCase.DisconnectUserInput{RefreshToken: cookie.Value}
+
+	err = h.DisconnectUserUseCase.Execute(input)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Expires:  time.Now().Add(-1 * time.Hour),
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	})
 
 	c.Status(http.StatusOK)
 }

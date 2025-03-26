@@ -1,4 +1,4 @@
-package userUseCase
+package useCase
 
 import (
 	"errors"
@@ -42,6 +42,10 @@ func TestLoginUser_Success(t *testing.T) {
 	mockSecurity.On("CheckPassword", input.Password, createdUser.Password).Return(true)
 
 	mockSecurity.On("GenerateJWT", &createdUser.ID, (*string)(nil), time.Minute*15, "login", createdUser.Verification.IsVerified).Return(accessToken, nil)
+	tokenRepo.On("Create", mock.MatchedBy(func(token *tokenDomain.Token) bool {
+		return token.UserID == createdUser.ID && token.Token == accessToken
+	})).Return(nil)
+
 	mockSecurity.On("GenerateJWT", &createdUser.ID, (*string)(nil), expiringTimeForRefreshToken, "refresh_token", createdUser.Verification.IsVerified).Return(refreshToken, nil)
 
 	tokenRepo.On("Create", mock.MatchedBy(func(token *tokenDomain.Token) bool {

@@ -1,4 +1,4 @@
-package userUseCase
+package useCase
 
 import (
 	"jamlink-backend/internal/modules/auth/domain/user"

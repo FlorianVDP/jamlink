@@ -43,11 +43,12 @@ func main() {
 	verifyUserUseCase := userUsecase.NewVerifyUserUseCase(userRepo, securityService)
 	requestResetPasswordUseCase := userUsecase.NewRequestResetPasswordUseCase(tokenRepo, userRepo, securityService, emailService)
 	resetPasswordUseCase := userUsecase.NewResetPasswordUseCase(tokenRepo, userRepo, securityService)
+	disconnectUserUseCase := userUsecase.NewDisconnectUserUseCase(tokenRepo)
 
 	// Setup router
 	r := gin.Default()
 
-	http.NewAuthHandler(r, securityService, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase, requestVerifyUserEmailUseCase, requestResetPasswordUseCase, resetPasswordUseCase)
+	http.NewAuthHandler(r, securityService, langService, createUserUseCase, loginUserUseCase, loginUserWithGoogleUseCase, refreshTokenUseCase, verifyUserUseCase, requestVerifyUserEmailUseCase, requestResetPasswordUseCase, resetPasswordUseCase, disconnectUserUseCase)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
 
 	// Run server

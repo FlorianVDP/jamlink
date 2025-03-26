@@ -8,4 +8,5 @@ var (
 	ErrTokenExpired        = errors.New("token expired")
 	ErrTokenCreationFailed = errors.New("token creation failed")
 	ErrTokenDeletionFailed = errors.New("token deletion failed")
+	ErrTokenNotFound       = errors.New("token not found")
 )

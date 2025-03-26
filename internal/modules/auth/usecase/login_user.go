@@ -1,4 +1,4 @@
-package userUseCase
+package useCase
 
 import (
 	"errors"
@@ -47,23 +47,33 @@ func (uc *LoginUserUseCase) Execute(input LoginUserInput) (*LoginUserOutput, err
 		return nil, security.ErrPasswordComparison
 	}
 
-	token, err := uc.security.GenerateJWT(&user.ID, nil, time.Minute*15, "login", user.Verification.IsVerified)
+	const tokenExpiringTime = time.Minute * 15
+
+	token, err := uc.security.GenerateJWT(&user.ID, nil, tokenExpiringTime, "login", user.Verification.IsVerified)
 
 	if err != nil {
 		return nil, err
 	}
-
-	const expiringTime = time.Hour * 24 * 7
-	refreshToken, err := uc.security.GenerateJWT(&user.ID, nil, expiringTime, "refresh_token", user.Verification.IsVerified)
-	if err != nil {
-		return nil, err
-	}
-
-	inDBToken, err := tokenDomain.CreateToken(user.ID, refreshToken, time.Now().Add(expiringTime))
+	inDBToken, err := tokenDomain.CreateToken(user.ID, token, time.Now().Add(tokenExpiringTime))
 	if err != nil {
 		return nil, err
 	}
 	err = uc.tokenRepo.Create(inDBToken)
+	if err != nil {
+		return nil, err
+	}
+
+	const refreshTokenExpiringTime = time.Hour * 24 * 7
+	refreshToken, err := uc.security.GenerateJWT(&user.ID, nil, refreshTokenExpiringTime, "refresh_token", user.Verification.IsVerified)
+	if err != nil {
+		return nil, err
+	}
+
+	inDBREfreshToken, err := tokenDomain.CreateToken(user.ID, refreshToken, time.Now().Add(refreshTokenExpiringTime))
+	if err != nil {
+		return nil, err
+	}
+	err = uc.tokenRepo.Create(inDBREfreshToken)
 	if err != nil {
 		return nil, err
 	}

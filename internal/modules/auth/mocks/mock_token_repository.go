@@ -28,3 +28,8 @@ func (m *MockTokenRepository) DeleteByID(userID uuid.UUID) error {
 	args := m.Called(userID)
 	return args.Error(0)
 }
+
+func (m *MockTokenRepository) DeleteUserTokens(userID uuid.UUID) error {
+	args := m.Called(userID)
+	return args.Error(0)
+}
